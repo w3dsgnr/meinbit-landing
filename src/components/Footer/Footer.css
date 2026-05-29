@@ -1,0 +1,84 @@
+/* ── Footer ───────────────────────────────────── */
+footer {
+  position: relative; z-index: 1;
+  background: transparent;
+  padding: clamp(200px, 24vw, 400px) 16px 40px;
+}
+.footer-inner { max-width: 1100px; margin: 0 auto; }
+
+.footer-glass {
+  background: rgba(255, 255, 255, .72);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border: 1px solid rgba(11, 34, 50, .09);
+  border-radius: 28px;
+  padding: 48px;
+  box-shadow: 0 8px 40px rgba(11, 34, 50, .08);
+}
+@media (max-width: 767px) { .footer-glass { padding: 32px 24px; border-radius: 24px; } }
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 48px;
+  align-items: stretch;
+}
+@media (max-width: 767px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 40px; }
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  color: var(--text);
+  letter-spacing: -.04em;
+  margin-bottom: 10px;
+}
+.footer-logo-mark { width: 32px; height: 32px; object-fit: contain; }
+.footer-logo > span > span { color: var(--accent); }
+.footer-tagline {
+  font-size: .92rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-bottom: 24px;
+  max-width: 32ch;
+}
+
+.store-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.store-badge {
+  display: block;
+  transition: opacity .2s, transform .15s;
+}
+.store-badge:hover { opacity: .85; transform: scale(.99); }
+.store-badge img { display: block; height: 40px; width: auto; }
+
+.footer-copyright {
+  font-size: .78rem;
+  color: rgba(11, 34, 50, .4);
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.footer-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.footer-col-title {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
+  color: rgba(11,34,50,.35); margin-bottom: 16px;
+}
+.footer-link-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
+.footer-link-list a { font-size: .88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+.footer-link-list a:hover { color: var(--text); }

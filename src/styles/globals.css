@@ -1,0 +1,84 @@
+/* ── Design tokens (light theme — Figma palette) ── */
+:root {
+  --bg:            #FAFFFE;
+  --bg-2:          #F4FAFE;
+  --surface:       #FFFFFF;
+  --surface-2:     #F0F9F8;
+  --accent:        #0FE67B;
+  --accent-2:      #00E095;
+  --accent-glow:   rgba(15,230,123,.10);
+  --accent-2-glow: rgba(0,224,149,.10);
+  --teal-bg:       #E3F5F5;
+  --navy:          #0B2232;
+  --text:          #0B2232;
+  --text-muted:    #788690;
+  --border:        rgba(11,34,50,.07);
+  --border-accent: rgba(15,230,123,.20);
+  --shadow-sm:     0 2px 8px rgba(11,34,50,.06);
+  --shadow-md:     0 4px 20px rgba(11,34,50,.09);
+  --grad-card:     linear-gradient(135deg, #002DE0, #0FE67B);
+  --grad-card-2:   linear-gradient(135deg, #0FE67B, #00E095);
+  --grad-banner:   linear-gradient(135deg, #129CFF, #12FFC4);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', system-ui, sans-serif;
+  color: var(--text);
+  overflow-x: hidden;
+  background: var(--bg);
+}
+
+/* ── Page wrapper ─────────────────────────────── */
+#page { position: relative; z-index: 1; }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn-primary {
+  background: var(--navy); color: #fff;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  padding: 15px 32px; border-radius: 100px;
+  text-decoration: none; cursor: pointer; border: none;
+  transition: opacity .2s, transform .15s;
+  display: inline-flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(11,34,50,.20);
+}
+.btn-primary:hover { opacity: .88; transform: scale(.98); }
+
+.btn-ghost {
+  background: rgba(255,255,255,.8);
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600; font-size: 1rem;
+  padding: 15px 32px; border-radius: 100px;
+  text-decoration: none; cursor: pointer;
+  border: 1px solid rgba(11,34,50,.12);
+  transition: background .2s, box-shadow .2s;
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-ghost:hover { background: #fff; box-shadow: var(--shadow-sm); }
+
+/* ── Section headings ─────────────────────────── */
+.section-title {
+  font-family: 'Space Grotesk', sans-serif; font-weight: 800;
+  font-size: clamp(1.9rem, 5vw, 3.6rem);
+  letter-spacing: -0.04em; line-height: 1.05;
+  color: var(--text); margin-bottom: 16px;
+}
+.section-title .accent { color: var(--accent); }
+.section-body {
+  font-size: 1.05rem; color: var(--text-muted);
+  line-height: 1.72; max-width: 52ch;
+}
+
+/* ── Stagger reveal ───────────────────────────── */
+.si {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity .55s cubic-bezier(.4,0,.2,1), transform .55s cubic-bezier(.4,0,.2,1);
+}
+.si.visible { opacity: 1; transform: translateY(0); }
+@media (prefers-reduced-motion: reduce) {
+  .si { opacity: 1; transform: none; transition: none; }
+}

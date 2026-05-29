@@ -1,0 +1,31 @@
+/* ── Fixed background ─────────────────────────── */
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--bg);
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-aurora {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 110% 80% at 18% 0%, rgba(181,242,80,.18) 0%, transparent 52%),
+    radial-gradient(ellipse 80% 80% at 88% 90%, rgba(15,230,123,.14) 0%, transparent 52%),
+    radial-gradient(ellipse 70% 55% at 70% 30%, rgba(0,224,149,.10) 0%, transparent 48%),
+    radial-gradient(ellipse 50% 40% at 40% 70%, rgba(18,156,255,.08) 0%, transparent 45%);
+}
+.bg-dots {
+  position: absolute; inset: 0;
+  background-image: radial-gradient(rgba(11,34,50,.04) 1px, transparent 1px);
+  background-size: 36px 36px;
+}
+.bg-grain {
+  position: absolute; inset: 0; opacity: .025;
+}
+.bg-video {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  opacity: .5;
+}

@@ -1,0 +1,93 @@
+/* ── Hero ─────────────────────────────────────── */
+#hero {
+  min-height: 100svh;
+  background: transparent;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 120px 24px 80px;
+  text-align: center; position: relative;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(15,230,123,.09);
+  border: 1px solid rgba(15,230,123,.22);
+  border-radius: 100px; padding: 6px 16px;
+  font-size: .78rem; font-weight: 600; color: var(--accent);
+  letter-spacing: .06em; text-transform: uppercase; margin-bottom: 28px;
+}
+
+.hero-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+  font-size: clamp(2.2rem, 8vw, 8rem);
+  letter-spacing: -0.04em; line-height: 1.05;
+  color: var(--text); margin-bottom: 28px;
+}
+.hero-title .accent { color: var(--accent); }
+.hero-title .hero-line { white-space: nowrap; }
+
+.hero-sub {
+  font-size: clamp(1rem, 1.8vw, 1.18rem);
+  color: var(--text-muted); line-height: 1.65;
+  max-width: 44ch; margin-bottom: 44px;
+}
+
+.hero-actions {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  justify-content: center; margin-bottom: 72px;
+}
+
+/* ── Phone mockups (real app screenshots) ─────── */
+.phone-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 680px;
+  gap: 0;
+}
+
+/* Shell carries the live transform (translate + rotate from JS). */
+.phone-shell {
+  position: relative;
+  flex-shrink: 0;
+  transition: transform .6s cubic-bezier(.22, 1, .36, 1);
+  will-change: transform;
+}
+.phone-shell-l { z-index: 1; transform-origin: bottom right; }
+.phone-shell-c { z-index: 2; }
+.phone-shell-r { z-index: 1; transform-origin: bottom left; }
+
+.phone-img {
+  display: block;
+  height: auto;
+  filter: drop-shadow(0 24px 56px rgba(11, 34, 50, .22));
+}
+.phone-img-main { width: 260px; }
+.phone-img-side { width: 210px; opacity: .9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-shell { transition: none; }
+}
+
+@media (max-width: 720px) {
+  .phone-shell-l, .phone-shell-r { display: none; }
+  .phone-img-main { width: 240px; }
+}
+@media (max-width: 380px) {
+  .phone-img-main { width: 220px; }
+}
+
+/* Trust strip */
+.trust-strip {
+  display: flex; gap: 28px; flex-wrap: wrap;
+  justify-content: center; margin-top: 52px;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: .82rem; color: var(--text-muted);
+}
+.trust-item i { color: var(--accent); font-size: 1rem; }
+
