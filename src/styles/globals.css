@@ -19,12 +19,14 @@
   --grad-card:     linear-gradient(135deg, #002DE0, #0FE67B);
   --grad-card-2:   linear-gradient(135deg, #0FE67B, #00E095);
   --grad-banner:   linear-gradient(135deg, #129CFF, #12FFC4);
+  /* Apple-style green→blue heading wash */
+  --grad-heading:  linear-gradient(108deg, #0FE67B 0%, #00C9A7 42%, #119BFF 100%);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 body {
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);
   overflow-x: hidden;
   background: var(--bg);
@@ -36,7 +38,7 @@ body {
 /* ── Buttons ─────────────────────────────────── */
 .btn-primary {
   background: var(--navy); color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 700; font-size: 1rem;
   padding: 15px 32px; border-radius: 100px;
   text-decoration: none; cursor: pointer; border: none;
@@ -49,7 +51,7 @@ body {
 .btn-ghost {
   background: rgba(255,255,255,.8);
   color: var(--text);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 600; font-size: 1rem;
   padding: 15px 32px; border-radius: 100px;
   text-decoration: none; cursor: pointer;
@@ -61,12 +63,31 @@ body {
 
 /* ── Section headings ─────────────────────────── */
 .section-title {
-  font-family: 'Space Grotesk', sans-serif; font-weight: 800;
+  font-family: 'Sora', sans-serif; font-weight: 600;
   font-size: clamp(1.9rem, 5vw, 3.6rem);
   letter-spacing: -0.04em; line-height: 1.05;
   color: var(--text); margin-bottom: 16px;
 }
-.section-title .accent { color: var(--accent); }
+/* Green→blue gradient clip for highlighted heading phrases.
+   Solid colour is the fallback where background-clip:text is unsupported. */
+.section-title .accent,
+.hero-title .hero-line,
+.text-grad {
+  color: #0FB76A;
+  background: var(--grad-heading);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .section-title .accent,
+  .hero-title .hero-line,
+  .text-grad {
+    background: none;
+    color: var(--accent-2);
+    -webkit-text-fill-color: currentColor;
+  }
+}
 .section-body {
   font-size: 1.05rem; color: var(--text-muted);
   line-height: 1.72; max-width: 52ch;

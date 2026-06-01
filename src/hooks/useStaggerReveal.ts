@@ -4,8 +4,13 @@ import { useEffect } from "react";
   Adds the `.visible` class to elements with `.si` as they enter the viewport,
   staggered by index inside their parent. Mirrors the legacy IntersectionObserver
   script from the original index-v2.html.
+
+  Pass a `key` (e.g. the current route pathname) so the observer is rebuilt after
+  client-side navigation swaps the page's `.si` elements for fresh ones. Without
+  this the observer keeps watching the unmounted page's nodes and the new page's
+  `.si` elements stay stuck at opacity 0.
 */
-export function useStaggerReveal() {
+export function useStaggerReveal(key?: string) {
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
@@ -27,5 +32,5 @@ export function useStaggerReveal() {
     items.forEach((el) => io.observe(el));
 
     return () => io.disconnect();
-  }, []);
+  }, [key]);
 }

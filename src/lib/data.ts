@@ -32,33 +32,79 @@ export const whyCards = [
 ] as const;
 
 export const cardFeatures = [
-  "Virtual card — instantly issued",
-  "Plastic card — delivered to you",
-  "Apple Pay & Google Pay",
-  "Freeze / unfreeze in one tap",
-  "Spend from fiat or crypto automatically",
-  "Set limits per merchant or category",
+  { icon: "ti-credit-card",            text: "Instant virtual card" },
+  { icon: "ti-truck-delivery",         text: "Plastic card delivered" },
+  { icon: "ti-device-mobile",          text: "Apple & Google Pay" },
+  { icon: "ti-snowflake",              text: "Freeze in one tap" },
+  { icon: "ti-coins",                  text: "Pay with fiat or crypto" },
+  { icon: "ti-adjustments-horizontal", text: "Per-merchant limits" },
 ] as const;
 
-export const fiatChips = [
-  "Instant account in EUR and USD",
-  "SEPA & SWIFT transfers",
-  "Personal IBAN",
-  "Up to 10 linked cards",
-  "Real-time balance updates",
-  "Transaction history & search",
+// Card variants for the fan-out stack. `brand` matches the Figma design
+// (gradient #56ff7f → #007eec); the other two are minimalist alternatives.
+export const bankCards = [
+  { variant: "light", last4: "7390" },
+  { variant: "brand", last4: "2547" },
+  { variant: "dark",  last4: "1834" },
+] as const;
+
+export const fiatBlocks = [
+  {
+    title: "Open an account in minutes",
+    mockup: "/open%20account.png",
+    mockupAlt: "MeinBit multi-currency account screen",
+    features: [
+      {
+        icon: "ti-wallet",
+        title: "Instant EUR & USD account",
+        body: "Open a fully-featured multi-currency account in minutes — no branch visit, no paperwork, no waiting.",
+      },
+      {
+        icon: "ti-id",
+        title: "Personal IBAN",
+        body: "Get your own dedicated IBAN to receive salaries, invoices and payments from anyone, anywhere.",
+      },
+      {
+        icon: "ti-activity",
+        title: "Real-time balance updates",
+        body: "Every transaction lands instantly with a push notification — you always know exactly where you stand.",
+      },
+    ],
+  },
+  {
+    title: "Move money, anywhere",
+    mockup: "/move%20money.png",
+    mockupAlt: "MeinBit transfers and cards screen",
+    features: [
+      {
+        icon: "ti-arrows-exchange",
+        title: "SEPA & SWIFT transfers",
+        body: "Move money across borders at bank-grade speed with transparent, low fees and live exchange rates.",
+      },
+      {
+        icon: "ti-credit-card",
+        title: "Up to 10 linked cards",
+        body: "Issue virtual and plastic Mastercards and manage all of them from a single, unified account.",
+      },
+      {
+        icon: "ti-list-search",
+        title: "Transaction history & search",
+        body: "Find any payment in seconds with smart categories, filters and full-text search across your history.",
+      },
+    ],
+  },
 ] as const;
 
 export const currencies = [
-  { code: "EUR", name: "Euro", color: "#003399" },
-  { code: "USD", name: "US Dollar", color: "#012169" },
-  { code: "GBP", name: "British Pound", color: "#C8102E" },
-  { code: "CHF", name: "Swiss Franc", color: "#FF0000" },
-  { code: "JPY", name: "Japanese Yen", color: "#BC002D" },
-  { code: "AED", name: "UAE Dirham", color: "#FF9900" },
-  { code: "SAR", name: "Saudi Riyal", color: "#006C35" },
-  { code: "PLN", name: "Polish Złoty", color: "#002868" },
-  { code: "TRY", name: "Turkish Lira", color: "#D62612" },
+  { code: "EUR", name: "Euro",          symbol: "€",  color: "#0A66FF" },
+  { code: "USD", name: "US Dollar",     symbol: "$",  color: "#1B8B5A" },
+  { code: "GBP", name: "British Pound", symbol: "£",  color: "#C8102E" },
+  { code: "CHF", name: "Swiss Franc",   symbol: "Fr", color: "#D8232A" },
+  { code: "JPY", name: "Japanese Yen",  symbol: "¥",  color: "#BC002D" },
+  { code: "AED", name: "UAE Dirham",    symbol: "Dh", color: "#F39200" },
+  { code: "SAR", name: "Saudi Riyal",   symbol: "SR", color: "#006C35" },
+  { code: "PLN", name: "Polish Złoty",  symbol: "zł", color: "#1E4FA3" },
+  { code: "TRY", name: "Turkish Lira",  symbol: "₺",  color: "#D62612" },
 ] as const;
 
 export type CryptoTicker = {
@@ -78,6 +124,21 @@ export const cryptoTickers: readonly CryptoTicker[] = [
   { coinGeckoId: "solana",      image: "/Solana%20(SOL).png",        name: "Solana",   sym: "SOL",  fallbackPrice: "$182",    fallbackChange: "+5.1%" },
   { coinGeckoId: "binancecoin", image: "/Binance%20Coin%20(BNB).png", name: "BNB",      sym: "BNB",  fallbackPrice: "$612",    fallbackChange: "+1.6%" },
 ];
+
+// The two messages that carry this section — expanded from throwaway chips
+// into the visual lead of the crypto block.
+export const cryptoHighlights = [
+  {
+    icon: "ti-discount",
+    title: "Low fees",
+    body: "Keep more of every move. No hidden spreads, no surprise charges — convert and transfer crypto at some of the lowest rates anywhere, with costs you can see upfront.",
+  },
+  {
+    icon: "ti-wallet",
+    title: "No separate wallet",
+    body: "Your crypto lives right next to your fiat. No seed phrases to guard, no external app, no addresses to copy — just hold, send and swap straight from your MeinBit account.",
+  },
+] as const;
 
 export const securityCards = [
   { image: "/Biometric%20login.png",            title: "Biometric login",           body: "Face ID and Touch ID keep your account accessible only to you." },

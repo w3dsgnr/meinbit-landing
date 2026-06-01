@@ -27,7 +27,7 @@
   filter: drop-shadow(0 2px 6px rgba(15, 230, 123, .15));
 }
 .nav-logo-text {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 800; font-size: .95rem;
   color: var(--text); letter-spacing: -.02em;
 }
@@ -42,7 +42,7 @@
 .nav-cta {
   margin-left: 8px;
   background: var(--navy); color: #fff;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 700; font-size: .82rem;
   padding: 9px 18px; border-radius: 100px;
   text-decoration: none; cursor: pointer;
@@ -65,7 +65,7 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 800; font-size: .9rem; color: var(--text);
   text-decoration: none;
 }

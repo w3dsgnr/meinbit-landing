@@ -27,7 +27,7 @@ export default function CookieBanner() {
         Our site uses cookies and similar technologies to offer you a better experience. We use analytical cookies
         (our own and third party) to understand and improve your browsing experience, and advertising cookies
         (our own and third party) to send you advertisements in line with your preferences.{" "}
-        <a href="#">Learn more</a>.
+        <a href="/cookie-policy">Learn more</a>.
       </p>
       <div className="cookie-actions">
         <button type="button" className="cookie-reject" onClick={() => decide("rejected")}>

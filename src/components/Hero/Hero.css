@@ -4,8 +4,16 @@
   background: transparent;
   display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  padding: 120px 24px 80px;
+  padding: 220px 24px 80px;
   text-align: center; position: relative;
+  overflow-x: clip;
+}
+
+/* Wraps the hero text so it can lift + fade as one block on scroll.
+   Keeps the original centred column layout for its children. */
+.hero-copy {
+  display: flex; flex-direction: column; align-items: center;
+  will-change: transform, opacity;
 }
 
 .hero-eyebrow {
@@ -18,14 +26,21 @@
 }
 
 .hero-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 800;
+  font-family: 'Sora', sans-serif;
+  font-weight: 600;
   font-size: clamp(2.2rem, 8vw, 8rem);
   letter-spacing: -0.04em; line-height: 1.05;
   color: var(--text); margin-bottom: 28px;
 }
 .hero-title .accent { color: var(--accent); }
 .hero-title .hero-line { white-space: nowrap; }
+
+/* Mobile: bump the hero title ~1.5× for more impact. Allow the long
+   "Every currency" line to wrap so the larger size never overflows. */
+@media (max-width: 767px) {
+  .hero-title { font-size: clamp(2.9rem, 11vw, 4rem); }
+  .hero-title .hero-line { white-space: normal; }
+}
 
 .hero-sub {
   font-size: clamp(1rem, 1.8vw, 1.18rem);
@@ -38,56 +53,99 @@
   justify-content: center; margin-bottom: 72px;
 }
 
+/* Minimalist scroll cue — label above a softly bobbing CSS chevron */
+.hero-scroll-link {
+  display: inline-flex; flex-direction: column; align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: .95rem; font-weight: 500;
+  text-decoration: none;
+  transition: color .25s ease;
+}
+/* Chevron drawn from two thin borders — line weight fully controllable */
+.hero-chevron {
+  width: 11px; height: 11px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  animation: scroll-bob 1.8s ease-in-out infinite;
+}
+.hero-scroll-link:hover { color: var(--text); }
+
+@keyframes scroll-bob {
+  0%, 100% { transform: rotate(45deg) translate(0, 0);     opacity: .45; }
+  50%      { transform: rotate(45deg) translate(3px, 3px); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-chevron { animation: none; opacity: .8; }
+}
+
 /* ── Phone mockups (real app screenshots) ─────── */
 .phone-wrap {
   position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   margin: 0 auto;
-  max-width: 680px;
+  max-width: 920px;
   gap: 0;
 }
 
-/* Shell carries the live transform (translate + rotate from JS). */
+/* Shell carries the live transform (translate from JS). The transform is
+   scroll-linked and written every frame, so it must NOT have a CSS
+   transition — easing toward a constantly-moving target lags behind the
+   scroll and reads as jitter on inertial scrolling. */
 .phone-shell {
-  position: relative;
   flex-shrink: 0;
-  transition: transform .6s cubic-bezier(.22, 1, .36, 1);
   will-change: transform;
 }
-.phone-shell-l { z-index: 1; transform-origin: bottom right; }
-.phone-shell-c { z-index: 2; }
-.phone-shell-r { z-index: 1; transform-origin: bottom left; }
+/* Centre phone stays in flow and sets the wrap size. */
+.phone-shell-c { position: relative; z-index: 2; }
+/* Side phones are vertically centred on the centre phone and slide out
+   from behind it. Out of flow, so the row width = centre phone width. */
+.phone-shell-l,
+.phone-shell-r {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+}
 
+/* Flat iPhone frame around each app screenshot. Radius/padding scale with
+   the phone so small mobile phones don't look over-rounded. */
+.device {
+  position: relative;
+  display: inline-block;
+  padding: clamp(3px, 0.5vw, 5px);
+  border: 3px solid transparent;
+  border-radius: clamp(26px, 6vw, 44px);
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(150deg, #f4f6f8 0%, #c2ccd4 28%, #9aa6b0 50%, #cdd6dd 72%, #e9eef2 100%) border-box;
+  box-shadow: 0 24px 56px rgba(11, 34, 50, .22);
+}
+/* Side buttons (power + volume) as thin flat silver nibs */
+.device::before,
+.device::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #c2ccd4, #9aa6b0);
+}
+.device::before { right: -3px; top: 28%; height: 14%; }            /* power */
+.device::after  { left: -3px;  top: 22%; height: 9%; }             /* volume */
+
+/* Natural image height (no crop). Fluid widths keep the trio massive on
+   desktop and compact on mobile. */
 .phone-img {
   display: block;
   height: auto;
-  filter: drop-shadow(0 24px 56px rgba(11, 34, 50, .22));
+  border-radius: clamp(20px, 5.2vw, 36px);
 }
-.phone-img-main { width: 260px; }
-.phone-img-side { width: 210px; opacity: .9; }
-
-@media (prefers-reduced-motion: reduce) {
-  .phone-shell { transition: none; }
-}
-
-@media (max-width: 720px) {
-  .phone-shell-l, .phone-shell-r { display: none; }
-  .phone-img-main { width: 240px; }
-}
-@media (max-width: 380px) {
-  .phone-img-main { width: 220px; }
-}
-
-/* Trust strip */
-.trust-strip {
-  display: flex; gap: 28px; flex-wrap: wrap;
-  justify-content: center; margin-top: 52px;
-}
-.trust-item {
-  display: flex; align-items: center; gap: 8px;
-  font-size: .82rem; color: var(--text-muted);
-}
-.trust-item i { color: var(--accent); font-size: 1rem; }
+.phone-img-main { width: clamp(172px, 46vw, 324px); }
+.phone-img-side { width: clamp(132px, 35vw, 262px); }
+.phone-shell-l .device,
+.phone-shell-r .device { opacity: .92; }
 

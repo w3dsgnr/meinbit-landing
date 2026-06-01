@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import {
   whyCards,
   cardFeatures,
-  fiatChips,
+  bankCards,
+  fiatBlocks,
   currencies,
   cryptoTickers,
+  cryptoHighlights,
   securityCards,
   securityChips,
   startSteps,
@@ -18,29 +20,15 @@ const CRYPTO_IDS = cryptoTickers.map((t) => t.coinGeckoId);
 export default function ContentCard() {
   return (
     <div className="content-card">
-      <div className="glow-line" />
-
+      <TrustSection />
       <WhyBannerSection />
-      <Divider />
-
       <FlowsSection />
-      <Divider />
-
       <FiatSection />
-      <Divider />
-
       <CardSection />
-      <Divider />
-
       <CryptoSection />
-      <Divider />
-
       <SecuritySection />
-      <Divider />
-
+      <SecurityChipsSection />
       <StartSection />
-      <Divider />
-
       <FaqSection />
     </div>
   );
@@ -48,17 +36,13 @@ export default function ContentCard() {
 
 /* ───────────────────────── Sections ───────────────────────── */
 
-function Divider() {
-  return <div className="cc-divider" />;
-}
-
 function WhyBannerSection() {
   return (
     <section id="why" className="cc-section">
       <div className="cc-inner">
         <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
           <h2 className="section-title">
-            Everything you need.<br />Nothing you don't.
+            Everything you need<br /><span className="accent">Nothing you don't</span>
           </h2>
           <p className="section-body" style={{ margin: "16px auto 0" }}>
             One app replaces your bank account, crypto exchange, and international transfer service.
@@ -79,62 +63,86 @@ function WhyBannerSection() {
   );
 }
 
-function CardSection() {
+function TrustSection() {
   return (
-    <section id="card" className="cc-section">
+    <section id="trust" className="cc-section">
       <div className="cc-inner">
-        <div className="two-col">
-          <div className="si">
-            <h2 className="section-title">
-              Your wallet in your<br />pocket — <span className="accent">literally.</span>
-            </h2>
-            <p className="section-body" style={{ marginBottom: 28 }}>
-              Issue a virtual Mastercard in minutes or order a plastic card delivered to your door.
-              Pay anywhere, freeze anytime, top up from fiat or crypto automatically — no manual exchange needed.
-            </p>
-            <ul style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {cardFeatures.map((feature) => (
-                <li key={feature} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
-                  <i className="ti ti-check" style={{ color: "var(--accent-2)", fontSize: "1rem", marginTop: 2, flexShrink: 0 }} />
-                  <span style={{ fontSize: ".9rem", color: "var(--text-muted)" }}>{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="si" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <div className="card-mockup">
-              <div className="cm-glaze" aria-hidden="true" />
-              <div className="cm-num">
-                <span className="cm-num-dots">••</span>
-                <span className="cm-num-tail">2547</span>
-              </div>
-              <div className="cm-name">John Doe</div>
-              <img src="/logo.png" alt="" className="cm-logo" />
-              <svg className="cm-mc" viewBox="0 0 46 40" aria-hidden="true">
-                <circle cx="17" cy="14" r="11" fill="#EB001B" />
-                <circle cx="29" cy="14" r="11" fill="#F79E1B" />
-                <path
-                  d="M23 6.4c1.9 2 3 4.6 3 7.6s-1.1 5.6-3 7.6c-1.9-2-3-4.6-3-7.6s1.1-5.6 3-7.6Z"
-                  fill="#FF5F00"
-                />
-                <text
-                  x="23"
-                  y="35"
-                  textAnchor="middle"
-                  fontFamily="'Space Grotesk', sans-serif"
-                  fontWeight={700}
-                  fontSize="6"
-                  fill="#fff"
-                  letterSpacing="0.04em"
-                >
-                  mastercard
-                </text>
-              </svg>
+        <div className="trust-band si">
+          <h2 className="section-title">
+            Money you can trust,<br />
+            <span className="accent">anywhere you go</span>
+          </h2>
+          <p className="section-body" style={{ margin: "16px auto 0" }}>
+            From everyday spending to cross-border transfers, MeinBit pairs bank-grade
+            security with modern technology — so your money moves further, faster, and
+            safer, in every corner of the world.
+          </p>
+
+          <div className="trust-stats">
+            <div className="stat">
+              <div className="stat-value">100<span className="stat-unit">+</span></div>
+              <div className="stat-label">Countries available</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">Bank-grade</div>
+              <div className="stat-label">Security &amp; encryption</div>
+            </div>
+            <div className="stat">
+              <div className="stat-value">Licensed</div>
+              <div className="stat-label">Regulated &amp; compliant</div>
             </div>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+function CardSection() {
+  return (
+    <section id="card" className="cc-section">
+      <div className="cc-inner">
+        <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
+          <h2 className="section-title">
+            Your wallet in your<br />pocket — <span className="accent">literally</span>
+          </h2>
+          <p className="section-body" style={{ margin: "16px auto 0" }}>
+            Issue a virtual Mastercard in minutes or order a plastic card delivered to your door.
+            Pay anywhere, freeze anytime, top up from fiat or crypto automatically — no manual exchange needed.
+          </p>
+        </div>
+        <div className="card-stack-col">
+          <div className="card-stack si" aria-hidden="true">
+            {bankCards.map((card) => (
+              <BankCard key={card.variant} variant={card.variant} last4={card.last4} />
+            ))}
+          </div>
+        </div>
+        <div className="card-chips si">
+          {cardFeatures.map(({ icon, text }) => (
+            <span key={text} className="trust-chip">
+              <i className={`ti ${icon}`} />
+              {text}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function BankCard({ variant, last4 }: { variant: string; last4: string }) {
+  return (
+    <div className={`bank-card bank-${variant}`}>
+      {variant === "brand" && <div className="bc-glaze" aria-hidden="true" />}
+      <div className="bc-num">
+        <span className="bc-dots"><span /><span /></span>
+        {last4}
+      </div>
+      <span className="bc-info">Show info</span>
+      <img src="/card-logo.svg" alt="" className="bc-logo" />
+      <img src="/card-mastercard.svg" alt="" className="bc-mc" />
+    </div>
   );
 }
 
@@ -144,7 +152,7 @@ function FlowsSection() {
       <div className="cc-inner">
         <div className="si" style={{ textAlign: "center", marginBottom: 56 }}>
           <h2 className="section-title">
-            Money moves the way<br />you <span className="accent">want it.</span>
+            Money moves the way<br />you <span className="accent">want it</span>
           </h2>
           <p className="section-body" style={{ margin: "16px auto 0" }}>
             Convert crypto to fiat, top up from a card, send via SEPA or SWIFT, receive crypto —
@@ -223,39 +231,72 @@ function FlowNode({
 }
 
 function FiatSection() {
+  const currencyLabel = `Supported currencies: ${currencies.map((c) => c.name).join(", ")} and 170 more.`;
+
+  const renderCurrencies = (copy: string) => (
+    <div className="currency-copy" aria-hidden={copy === "b" ? true : undefined}>
+      {currencies.map(({ code, name, symbol }) => (
+        <span key={`${copy}-${code}`} className="currency-chip">
+          <span className="currency-badge">{symbol}</span>
+          <span className="currency-name">{name}</span>
+        </span>
+      ))}
+      <span className="currency-chip currency-more">
+        <span className="currency-badge"><i className="ti ti-plus" /></span>
+        <span className="currency-name">170+ more</span>
+      </span>
+    </div>
+  );
+
   return (
     <section id="fiat" className="cc-section">
       <div className="cc-inner">
-        <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
+        <div className="si" style={{ textAlign: "center", marginBottom: 64 }}>
           <h2 className="section-title">
-            Real banking, built for<br />the <span className="accent">digital age.</span>
+            Real banking, built for<br />the <span className="accent">digital age</span>
           </h2>
-          <p className="section-body" style={{ margin: "0 auto 24px" }}>
+          <p className="section-body" style={{ margin: "0 auto" }}>
             Open a multi-currency account in EUR, USD and more. Send money via SEPA and SWIFT worldwide.
             Receive payments to your personal IBAN. Manage up to 10 cards from a single account.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 40 }}>
-            {fiatChips.map((chip) => (
-              <span key={chip} className="chip-pill" style={{ padding: "6px 14px" }}>
-                <i className="ti ti-bolt" />
-                {chip}
-              </span>
-            ))}
-          </div>
         </div>
-        <div className="currency-grid" style={{ justifyContent: "center", maxWidth: 700, margin: "0 auto" }}>
-          {currencies.map(({ code, name, color }) => (
-            <div key={code} className="currency-pill si">
-              <div className="cp-dot" style={{ background: color }} />
-              {code} — {name}
+
+        {fiatBlocks.map((block, i) => (
+          <div key={block.title} className={`two-col fiat-block${i % 2 === 1 ? " reverse" : ""}`}>
+            <div className="si">
+              <h3 className="fiat-block-title">{block.title}</h3>
+              <ul className="feature-list">
+                {block.features.map(({ icon, title, body }) => (
+                  <li key={title} className="feature-row">
+                    <div className="feature-ico"><i className={`ti ${icon}`} /></div>
+                    <div>
+                      <h4 className="feature-title">{title}</h4>
+                      <p className="feature-body">{body}</p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
-          ))}
-          <div
-            className="currency-pill si"
-            style={{ background: "rgba(15,230,123,.08)", borderColor: "var(--border-accent)", color: "var(--accent)" }}
-          >
-            <i className="ti ti-plus" style={{ fontSize: ".8rem" }} />
-            170+ more
+            <div className="si fiat-mockup">
+              {block.mockup ? (
+                <div className="fiat-phone">
+                  <img src={block.mockup} alt={block.mockupAlt} />
+                </div>
+              ) : (
+                <div className="fiat-mockup-ph" aria-hidden="true">
+                  <i className="ti ti-device-mobile" />
+                  <span>App mockup #{i + 1}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+        {/* Currency marquee closes out the section */}
+        <div className="currency-marquee si" role="group" aria-label={currencyLabel}>
+          <div className="currency-track">
+            {renderCurrencies("a")}
+            {renderCurrencies("b")}
           </div>
         </div>
       </div>
@@ -265,54 +306,54 @@ function FiatSection() {
 
 function CryptoSection() {
   const quotes = useCryptoPrices(CRYPTO_IDS);
+  const tickerLabel = `Supported assets: ${cryptoTickers.map((t) => t.name).join(", ")} and more.`;
+
+  const renderTickers = (copy: "a" | "b") => (
+    <div className="crypto-copy" aria-hidden={copy === "b" ? true : undefined}>
+      {cryptoTickers.map((t) => {
+        const quote = quotes[t.coinGeckoId];
+        const price = quote?.price ?? t.fallbackPrice;
+        const change = quote?.change ?? t.fallbackChange;
+        const positive = quote ? quote.changePositive : !t.fallbackChange.startsWith("-");
+        return (
+          <span key={`${copy}-${t.sym}`} className="crypto-pill">
+            <span className="cp-icon"><img src={t.image} alt="" /></span>
+            <span className="cp-sym">{t.sym}</span>
+            <span className="cp-price">{price}</span>
+            <span className={positive ? "cp-change-pos" : "cp-change-neg"}>{change}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
 
   return (
     <section id="crypto" className="cc-section">
       <div className="cc-inner">
-        <div className="two-col">
-          <div className="si">
-            <h2 className="section-title">
-              Crypto made<br /><span className="accent">simple. Finally.</span>
-            </h2>
-            <p className="section-body" style={{ marginBottom: 28 }}>
-              Hold, send and receive BTC, ETH, USDC, TRX, SOL, BNB and more. Convert any crypto to fiat or stablecoins
-              instantly — high speed, low fees. No separate wallet needed.
-            </p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              <span style={{
-                background: "rgba(11,34,50,.05)", border: "1px solid var(--border)",
-                color: "var(--text-muted)", fontSize: ".75rem", padding: "5px 12px", borderRadius: 100,
-              }}>Low fees</span>
-              <span style={{
-                background: "rgba(11,34,50,.05)", border: "1px solid var(--border)",
-                color: "var(--text-muted)", fontSize: ".75rem", padding: "5px 12px", borderRadius: 100,
-              }}>No separate wallet</span>
+        <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
+          <h2 className="section-title">
+            Crypto made<br /><span className="accent">simple, finally</span>
+          </h2>
+          <p className="section-body" style={{ margin: "16px auto 0" }}>
+            Hold, send and receive BTC, ETH, USDC, TRX, SOL, BNB and more — and convert any of them
+            to fiat or stablecoins instantly, at high speed.
+          </p>
+        </div>
+
+        <div className="crypto-highlights">
+          {cryptoHighlights.map(({ icon, title, body }) => (
+            <div key={title} className="crypto-highlight si">
+              <div className="ch-ico"><i className={`ti ${icon}`} /></div>
+              <h3 className="ch-title">{title}</h3>
+              <p className="ch-body">{body}</p>
             </div>
-          </div>
-          <div className="si">
-            <div className="crypto-ticker">
-              {cryptoTickers.map((t) => {
-                const quote = quotes[t.coinGeckoId];
-                const price = quote?.price ?? t.fallbackPrice;
-                const change = quote?.change ?? t.fallbackChange;
-                const positive = quote ? quote.changePositive : !t.fallbackChange.startsWith("-");
-                return (
-                  <div key={t.sym} className="ticker-row">
-                    <div className="ticker-left">
-                      <div className="ticker-icon"><img src={t.image} alt="" /></div>
-                      <div>
-                        <div className="ticker-name">{t.name}</div>
-                        <div className="ticker-full">{t.sym}</div>
-                      </div>
-                    </div>
-                    <div className="ticker-right">
-                      <div className="ticker-price">{price}</div>
-                      <div className={positive ? "ticker-change-pos" : "ticker-change-neg"}>{change}</div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+          ))}
+        </div>
+
+        <div className="crypto-marquee si" role="group" aria-label={tickerLabel}>
+          <div className="crypto-track">
+            {renderTickers("a")}
+            {renderTickers("b")}
           </div>
         </div>
       </div>
@@ -326,13 +367,13 @@ function SecuritySection() {
       <div className="cc-inner">
         <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
           <h2 className="section-title">
-            Security you can<br /><span className="accent">actually feel.</span>
+            Security you can<br /><span className="accent">actually feel</span>
           </h2>
           <p className="section-body" style={{ margin: "0 auto" }}>
             Three layers of protection on every login and transaction — so your account stays yours, no matter what.
           </p>
         </div>
-        <div className="banner-grid" style={{ marginBottom: 24 }}>
+        <div className="banner-grid">
           {securityCards.map(({ image, title, body }) => (
             <div key={title} className="banner-card si">
               <img src={image} alt="" className="banner-image" />
@@ -341,13 +382,34 @@ function SecuritySection() {
             </div>
           ))}
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center" }} className="si">
-          {securityChips.map(({ icon, text }) => (
-            <span key={text} className="chip-pill">
-              <i className={`ti ${icon}`} />
-              {text}
-            </span>
-          ))}
+      </div>
+    </section>
+  );
+}
+
+function SecurityChipsSection() {
+  return (
+    <section id="trust-badges" className="cc-section trust-badges-section">
+      <div className="cc-inner">
+        <div className="trust-badges-panel si">
+          <div className="trust-badges-head">
+            <h2 className="section-title trust-badges-title">
+              Built on a foundation<br /><span className="accent">of trust</span>
+            </h2>
+            <p className="section-body trust-badges-sub">
+              Held to the same standards as a regulated financial institution — bank-grade
+              encryption, independent audits and a licensed operating entity, working quietly
+              in the background.
+            </p>
+          </div>
+          <div className="trust-badges-chips">
+            {securityChips.map(({ icon, text }) => (
+              <span key={text} className="trust-chip">
+                <i className={`ti ${icon}`} />
+                {text}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -360,7 +422,7 @@ function StartSection() {
       <div className="cc-inner">
         <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
           <h2 className="section-title">
-            Get started<br />in <span className="accent">minutes.</span>
+            Get started<br /><span className="accent">in minutes</span>
           </h2>
           <p className="section-body" style={{ margin: "0 auto" }}>
             No branch visits. No paperwork. No waiting.
@@ -375,11 +437,6 @@ function StartSection() {
             </div>
           ))}
         </div>
-        <div style={{ textAlign: "center", marginTop: 48 }} className="si">
-          <a href="#" className="btn-primary" style={{ fontSize: "1.05rem", padding: "17px 40px" }}>
-            <i className="ti ti-download" /> Download MeinBit Free
-          </a>
-        </div>
       </div>
     </section>
   );
@@ -393,7 +450,7 @@ function FaqSection() {
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
           <div className="si" style={{ textAlign: "center", marginBottom: 48 }}>
             <h2 className="section-title">
-              Common <span className="accent">questions</span>
+              <span className="accent">Common questions</span>
             </h2>
           </div>
           <div className="faq-list">
@@ -426,6 +483,7 @@ function FaqItem({
 }) {
   const itemRef = useRef<HTMLDivElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
+  const [maxHeight, setMaxHeight] = useState(0);
 
   /*
     useStaggerReveal adds the `.visible` class to .si elements via direct DOM
@@ -437,7 +495,25 @@ function FaqItem({
     itemRef.current?.classList.toggle("open", open);
   }, [open]);
 
-  const maxHeight = open ? innerRef.current?.scrollHeight ?? 0 : 0;
+  /*
+    Drive the expand/collapse height from a measured value. Recompute whenever
+    the answer wraps differently (window/content resize) while open, so the
+    panel never clips its content.
+  */
+  useEffect(() => {
+    if (!open) {
+      setMaxHeight(0);
+      return;
+    }
+    const inner = innerRef.current;
+    if (!inner) return;
+    const sync = () => setMaxHeight(inner.scrollHeight);
+    sync();
+    const ro = new ResizeObserver(sync);
+    ro.observe(inner);
+    return () => ro.disconnect();
+  }, [open]);
+
   return (
     <div ref={itemRef} className="faq-item si">
       <div className="faq-q" onClick={onToggle}>

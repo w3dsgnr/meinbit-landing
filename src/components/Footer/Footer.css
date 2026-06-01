@@ -35,7 +35,7 @@ footer {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Sora', sans-serif;
   font-weight: 800;
   font-size: 1.6rem;
   color: var(--text);
@@ -75,7 +75,7 @@ footer {
 
 .footer-links-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
 .footer-col-title {
-  font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+  font-family: 'Sora', sans-serif; font-weight: 700;
   font-size: .8rem; letter-spacing: .08em; text-transform: uppercase;
   color: rgba(11,34,50,.35); margin-bottom: 16px;
 }

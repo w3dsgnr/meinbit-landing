@@ -9,16 +9,39 @@ export default function Background() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
     const applyRate = () => { video.playbackRate = PLAYBACK_RATE; };
     video.addEventListener("loadedmetadata", applyRate);
     applyRate();
-    return () => video.removeEventListener("loadedmetadata", applyRate);
+
+    // iOS blocks muted-inline autoplay in Low Power Mode (and occasionally
+    // until a gesture). Try to play; if the browser rejects it, start on the
+    // first user interaction. Setting muted imperatively also sidesteps
+    // React not always rendering the `muted` attribute.
+    video.muted = true;
+    const gestureEvents = ["touchstart", "pointerdown", "scroll", "click"] as const;
+    const startOnGesture = () => { video.play().catch(() => {}); cleanup(); };
+    const cleanup = () =>
+      gestureEvents.forEach((e) => window.removeEventListener(e, startOnGesture));
+    const tryPlay = () => {
+      const p = video.play();
+      if (p) p.catch(() => {
+        gestureEvents.forEach((e) =>
+          window.addEventListener(e, startOnGesture, { once: true, passive: true }));
+      });
+    };
+    tryPlay();
+
+    return () => {
+      video.removeEventListener("loadedmetadata", applyRate);
+      cleanup();
+    };
   }, []);
 
   return (
     <div id="bg">
       <video ref={videoRef} className="bg-video" autoPlay muted loop playsInline>
-        <source src="/bg-video.mp4" type="video/mp4" />
+        <source src="/bg-video2-boomerang.mp4" type="video/mp4" />
       </video>
       <div className="bg-aurora" />
       <div className="bg-dots" />
