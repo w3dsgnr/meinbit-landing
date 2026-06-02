@@ -117,25 +117,17 @@
 .device {
   position: relative;
   display: inline-block;
-  padding: clamp(3px, 0.5vw, 5px);
-  border: 3px solid transparent;
+  padding: 0;
+  border: none;
   border-radius: clamp(26px, 6vw, 44px);
   background:
     linear-gradient(#fff, #fff) padding-box,
     linear-gradient(150deg, #f4f6f8 0%, #c2ccd4 28%, #9aa6b0 50%, #cdd6dd 72%, #e9eef2 100%) border-box;
   box-shadow: 0 24px 56px rgba(11, 34, 50, .22);
 }
-/* Side buttons (power + volume) as thin flat silver nibs */
+/* Side buttons hidden temporarily */
 .device::before,
-.device::after {
-  content: "";
-  position: absolute;
-  width: 2px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #c2ccd4, #9aa6b0);
-}
-.device::before { right: -3px; top: 28%; height: 14%; }            /* power */
-.device::after  { left: -3px;  top: 22%; height: 9%; }             /* volume */
+.device::after { content: none; }
 
 /* Natural image height (no crop). Fluid widths keep the trio massive on
    desktop and compact on mobile. */
