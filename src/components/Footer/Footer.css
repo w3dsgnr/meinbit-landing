@@ -82,3 +82,23 @@ footer {
 .footer-link-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
 .footer-link-list a { font-size: .88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
 .footer-link-list a:hover { color: var(--text); }
+
+/* horizontal divider + legal disclaimer below copyright */
+.footer-divider {
+  height: 1px;
+  width: 100%;
+  background: rgba(11, 34, 50, .09);
+  margin: 56px 0 40px;
+}
+.footer-legal {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.footer-legal p {
+  font-size: .72rem;
+  line-height: 1.6;
+  color: rgba(11, 34, 50, .4);
+  margin: 0;
+}
