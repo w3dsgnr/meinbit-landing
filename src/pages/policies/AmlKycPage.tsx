@@ -2,7 +2,7 @@ import PolicyLayout from "@/components/PolicyLayout/PolicyLayout";
 
 export default function AmlKycPage() {
   return (
-    <PolicyLayout title="AML / KYC Policy" updated="6 Dec 2025">
+    <PolicyLayout title="AML / KYC Policy" updated="5 Jun 2026">
       <div className="policy-callout">
         <p><strong>The important things to know</strong></p>
         <p>The Operator requires identity verification and transaction monitoring. Failure to provide requested information may result in account denial, restrictions, or closure. A risk-based methodology determines the intensity of compliance checks. Users and transactions face screening against sanctions lists, with possible reporting to authorities that typically cannot be disclosed. Third-party verification providers assist with identity checks and fraud prevention. KYC/AML records are retained for years post-relationship. The Operator disclaims liability for compliance-related losses within legal limits.</p>
@@ -12,7 +12,8 @@ export default function AmlKycPage() {
       <p>This Policy explains KYC and AML/CFT measures for the Service. Terms reference definitions in related legal documents, with the Imprint prevailing on Operator identification. The Policy applies to all Users and Service activities across all interfaces.</p>
 
       <h2>2. Legal framework and status as obliged institution</h2>
-      <p>The Operator qualifies as an obliged institution under Polish counteracting money laundering legislation and related EU AML/CFT requirements. Obliged institutions must conduct due diligence, monitor transactions, maintain records, and report suspicious activity. This Policy summarises high-level requirements without replacing detailed internal procedures.</p>
+      <p>The Service is operated by <strong>LUNTRA sp. z o.o.</strong> (KRS: 0001143324, NIP: 8982315211), entered in the Polish Register of Virtual Currency Activities (Rejestr Działalności w Zakresie Walut Wirtualnych) under number <strong>RDWW-1771</strong>, maintained by the Director of the Tax Administration Chamber in Katowice (entry effective 18 December 2024).</p>
+      <p>The Operator qualifies as an obliged institution under the Polish Act of 1 March 2018 on Counteracting Money Laundering and Terrorist Financing and related EU AML/CFT requirements. Obliged institutions must conduct due diligence, monitor transactions, maintain records, and report suspicious activity. This Policy summarises high-level requirements without replacing detailed internal procedures.</p>
 
       <h2>3. Risk-based approach</h2>
       <p>The Operator assesses and classifies risks, applying intensive measures for higher-risk situations and simplified measures where legally permitted. Risk factors include:</p>
@@ -109,7 +110,16 @@ export default function AmlKycPage() {
       <h2>12. Limitation of liability</h2>
       <p>The Operator disclaims liability for losses resulting from KYC performance, Service access refusal, transaction delays, or authority reporting within legal limits. This excludes liability for wilful misconduct or gross negligence. The Policy creates no additional liability basis beyond the Terms of Use, which apply equally to compliance measures.</p>
 
-      <h2>13. Relationship with other documents and changes to this Policy</h2>
+      <h2>13. Travel Rule (information accompanying transfers of crypto-assets)</h2>
+      <p>As a provider of virtual currency / crypto-asset services, the Operator is subject to Regulation (EU) 2023/1113 on information accompanying transfers of funds and certain crypto-assets (the "Travel Rule"). For transfers of crypto-assets, the Operator is required to:</p>
+      <ul>
+        <li>collect, hold and transmit prescribed information about the originator and the beneficiary — which may include names, wallet/account identifiers, and, where applicable, addresses, official personal document numbers, customer identification numbers, or the date and place of birth;</li>
+        <li>obtain and verify equivalent information for incoming transfers; and</li>
+        <li>share this information with the crypto-asset service provider of the counterparty, with intermediaries, and with competent authorities, as required by the Travel Rule and AML Regulations.</li>
+      </ul>
+      <p>Where required information is missing, incomplete, or cannot be verified, the Operator may delay, reject, return, or suspend the relevant transfer and may request additional information before proceeding. The processing of personal data under the Travel Rule is described further in the Privacy Policy.</p>
+
+      <h2>14. Relationship with other documents and changes to this Policy</h2>
       <p>This Policy integrates with the Terms of Use and Privacy Policy. In conflicts, the Terms of Use prevail regarding contractor relationships unless AML Regulations mandate otherwise. The Operator may update this Policy for regulatory or operational reasons, with updates published in the Service. Continued Service use after updates constitutes Policy acknowledgement.</p>
     </PolicyLayout>
   );

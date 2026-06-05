@@ -2,7 +2,7 @@ import PolicyLayout from "@/components/PolicyLayout/PolicyLayout";
 
 export default function PrivacyPolicyPage() {
   return (
-    <PolicyLayout title="Privacy Policy" updated="6 Dec 2025">
+    <PolicyLayout title="Privacy Policy" updated="5 Jun 2026">
       <div className="policy-callout">
         <p><strong>The important things to know</strong></p>
         <ul>
@@ -18,7 +18,11 @@ export default function PrivacyPolicyPage() {
       </div>
 
       <h2>1. Controller and contact details</h2>
-      <p>This Policy explains personal data processing connected to the Service. The controller is the legal entity identified in Imprint / Legal Information as the Service provider. Contact details appear in Imprint / Legal Information or within support options. If a Data Protection Officer or privacy contact is appointed, notice will be provided in Imprint / Legal Information or a Policy update.</p>
+      <p>This Policy explains personal data processing connected to the Service. The controller of your personal data is:</p>
+      <p><strong>LUNTRA sp. z o.o.</strong><br />
+      ul. Romana Dmowskiego 3/9, 50-203 Wrocław, Poland<br />
+      KRS: 0001143324 · NIP: 8982315211 · REGON: 540382294</p>
+      <p>You can contact the Operator about data protection matters via the in-app chat, the contact / support options within the Service, or by post at the address above. Further details appear in Imprint / Legal Information. If a Data Protection Officer or dedicated privacy contact is appointed, notice will be provided in Imprint / Legal Information or a Policy update.</p>
 
       <h2>2. Scope of this Policy and relationship with third-party platforms</h2>
       <p>This Policy applies when you access or use the Service, create an Account, participate in identity verification or KYC/AML processes, communicate with the provider, or when data processing is legally required or protects legitimate interests.</p>
@@ -96,7 +100,7 @@ export default function PrivacyPolicyPage() {
       <p><strong>Legal basis:</strong> Performance of contract or steps taken at your request prior to contract entry (Article 6(1)(b) GDPR); for related processing, legitimate interests (Article 6(1)(f) GDPR) such as ensuring Service security and stability.</p>
 
       <h3>5.2 Compliance with legal obligations (including AML/CFT, tax and financial regulations)</h3>
-      <p><strong>Purpose:</strong> Conduct KYC and customer due diligence; perform ongoing monitoring, sanctions screening, and risk assessments; keep records and report to competent authorities as required; comply with tax, accounting, reporting, and regulatory obligations including administrative cooperation and financial information reporting.</p>
+      <p><strong>Purpose:</strong> Conduct KYC and customer due diligence; perform ongoing monitoring, sanctions screening, and risk assessments; comply with the EU "Travel Rule" (Regulation (EU) 2023/1113) by collecting, transmitting, receiving and verifying information on the originator and beneficiary of crypto-asset transfers; keep records and report to competent authorities as required; comply with tax, accounting, reporting, and regulatory obligations including administrative cooperation and financial information reporting.</p>
       <p><strong>Legal basis:</strong> Compliance with legal obligations to which the Controller is subject (Article 6(1)(c) GDPR).</p>
 
       <h3>5.3 Security, fraud prevention and risk management</h3>
@@ -121,6 +125,7 @@ export default function PrivacyPolicyPage() {
         <li><strong>Group entities:</strong> Other companies within the same group as the Operator for internal administration, risk management, compliance, or service provision.</li>
         <li><strong>Verification providers and KYC/AML partners:</strong> Specialised providers of identity verification, document authentication, sanctions screening, transaction monitoring, and fraud prevention.</li>
         <li><strong>Payment service providers and banks:</strong> Processing Fiat Currency payments, withdrawals, settlements, chargebacks, and related controls.</li>
+        <li><strong>Counterparty crypto-asset service providers and intermediaries:</strong> When you send or receive crypto-assets, originator and beneficiary information is shared with the counterparty's crypto-asset service provider and any intermediaries as required by the EU Travel Rule (Regulation (EU) 2023/1113).</li>
         <li><strong>Technical and infrastructure providers:</strong> IT hosting, cloud, security, analytics, communications, and other technology service providers.</li>
         <li><strong>Professional advisors:</strong> Lawyers, auditors, consultants, accountants for legal, compliance, or business purposes.</li>
         <li><strong>Public authorities and regulators:</strong> Financial intelligence units, law enforcement, courts, data protection authorities, tax authorities, and other public bodies where required by law or legitimately requested, including AML/CFT, tax reporting, administrative cooperation, sanctions, or other regulatory obligations.</li>

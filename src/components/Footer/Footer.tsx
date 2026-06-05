@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { openCookieSettings } from "@/components/CookieBanner/consent";
 import "./Footer.css";
 
 const productLinks = [
@@ -49,6 +50,11 @@ export default function Footer() {
                   {legalLinks.map((l) => (
                     <li key={l.label}><Link to={l.to}>{l.label}</Link></li>
                   ))}
+                  <li>
+                    <button type="button" className="footer-link-btn" onClick={openCookieSettings}>
+                      Cookie settings
+                    </button>
+                  </li>
                 </ul>
               </div>
             </div>

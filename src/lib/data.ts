@@ -151,7 +151,7 @@ export const securityChips = [
   { icon: "ti-credit-card-off",  text: "Instant card freeze" },
   { icon: "ti-eye",              text: "Advanced ML identity verification" },
   { icon: "ti-certificate",      text: "PCI DSS compliant" },
-  { icon: "ti-building-bank",    text: "Licensed virtual currency business (RDWW-1241, Poland)" },
+  { icon: "ti-building-bank",    text: "Licensed virtual currency business (RDWW-1771, Poland)" },
 ] as const;
 
 export const startSteps = [
@@ -201,6 +201,6 @@ export const faqItems = [
   },
   {
     q: "How do I contact support?",
-    a: "In-app support is available 24/7 via the chat button. You can also reach us through the Support page on our website. For regulatory or compliance inquiries, contact Trust Change Sp. z o.o. directly.",
+    a: "In-app support is available 24/7 via the chat button. You can also reach us through the Support page on our website. For regulatory or compliance inquiries, contact LUNTRA sp. z o.o. directly.",
   },
 ] as const;

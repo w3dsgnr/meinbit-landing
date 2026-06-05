@@ -87,6 +87,83 @@
   transform: scale(.99);
 }
 
+.cookie-actions .cookie-customize {
+  background: transparent;
+  color: var(--text);
+  border: 1.5px solid rgba(11, 34, 50, .18);
+}
+.cookie-actions .cookie-customize:hover {
+  background: rgba(11, 34, 50, .04);
+  border-color: rgba(11, 34, 50, .28);
+}
+
+/* ── Category settings ───────────────────────── */
+.cookie-cats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  border-top: 1px solid rgba(11, 34, 50, .08);
+  padding-top: 18px;
+}
+
+.cookie-cat {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(11, 34, 50, .03);
+  cursor: pointer;
+}
+.cookie-cat--locked { cursor: default; opacity: .85; }
+
+.cookie-cat-info { display: flex; flex-direction: column; gap: 3px; }
+.cookie-cat-name {
+  font-family: 'Sora', sans-serif;
+  font-weight: 700;
+  font-size: .9rem;
+  color: var(--text);
+}
+.cookie-cat-desc {
+  font-size: .82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* Accessible toggle switch built on a native checkbox */
+.cookie-switch {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 0 0 auto;
+  position: relative;
+  width: 44px;
+  height: 26px;
+  margin-top: 2px;
+  border-radius: 100px;
+  background: rgba(11, 34, 50, .18);
+  border: none;
+  cursor: pointer;
+  transition: background .2s;
+}
+.cookie-switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(11, 34, 50, .3);
+  transition: transform .2s;
+}
+.cookie-switch:checked { background: var(--accent); }
+.cookie-switch:checked::after { transform: translateX(18px); }
+.cookie-switch:disabled { cursor: not-allowed; opacity: .7; }
+.cookie-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
 @media (max-width: 600px) {
   .cookie-banner { padding: 22px 20px; border-radius: 20px; bottom: 16px; }
   .cookie-title { font-size: .95rem; }

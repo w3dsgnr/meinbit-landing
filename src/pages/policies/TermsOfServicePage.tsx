@@ -2,7 +2,7 @@ import PolicyLayout from "@/components/PolicyLayout/PolicyLayout";
 
 export default function TermsOfServicePage() {
   return (
-    <PolicyLayout title="Terms of Use" updated="6 Dec 2025">
+    <PolicyLayout title="Terms of Use" updated="5 Jun 2026">
       <div className="policy-callout">
         <p><strong>The important things to know</strong></p>
         <ul>
@@ -200,23 +200,24 @@ export default function TermsOfServicePage() {
       <hr />
 
       <h2>Operator information</h2>
-      <p><strong>Company:</strong> Trust Change Sp. z o.o. (limited liability company registered in Poland)</p>
+      <p><strong>Company:</strong> LUNTRA sp. z o.o. (limited liability company registered in Poland)</p>
       <ul>
-        <li>KRS: 0001090716</li>
-        <li>NIP: 7011191958</li>
-        <li>REGON: 527919235</li>
-        <li>Registered Office: ul. Hoża 86, lok. 210, 00-682 Warsaw, Poland</li>
-        <li>RDWW Registration Number: RDWW-1241 (Virtual Currency Business Register)</li>
-        <li>RDWW Registration Date: April 3, 2024</li>
+        <li>KRS: 0001143324 (District Court for Wrocław-Fabryczna in Wrocław, 6th Commercial Division of the National Court Register)</li>
+        <li>NIP: 8982315211</li>
+        <li>REGON: 540382294</li>
+        <li>Registered Office: ul. Romana Dmowskiego 3/9, 50-203 Wrocław, Poland</li>
+        <li>Share capital: PLN 5,000.00, fully paid in</li>
+        <li>RDWW Registration Number: RDWW-1771 (Register of Virtual Currency Activities)</li>
+        <li>RDWW Registration Date: 18 December 2024</li>
       </ul>
       <p><strong>Authorised activities:</strong></p>
       <ul>
         <li>Exchange between virtual currencies and fiat currencies</li>
         <li>Exchange between virtual currencies</li>
         <li>Intermediation in such exchanges</li>
-        <li>Maintenance of virtual currency accounts per Polish law</li>
+        <li>Maintenance of accounts for virtual currencies per Polish law</li>
       </ul>
-      <p>© Trust Change Sp. z o.o. All rights reserved.</p>
+      <p>© LUNTRA sp. z o.o. All rights reserved.</p>
     </PolicyLayout>
   );
 }

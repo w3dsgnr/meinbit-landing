@@ -80,8 +80,14 @@ footer {
   color: rgba(11,34,50,.35); margin-bottom: 16px;
 }
 .footer-link-list { display: flex; flex-direction: column; gap: 10px; list-style: none; }
-.footer-link-list a { font-size: .88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
-.footer-link-list a:hover { color: var(--text); }
+.footer-link-list a,
+.footer-link-btn { font-size: .88rem; color: var(--text-muted); text-decoration: none; transition: color .2s; }
+.footer-link-list a:hover,
+.footer-link-btn:hover { color: var(--text); }
+.footer-link-btn {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font-family: inherit; text-align: left;
+}
 
 /* horizontal divider + legal disclaimer below copyright */
 .footer-divider {
