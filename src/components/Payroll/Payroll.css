@@ -574,7 +574,9 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     width: min(92vw, 600px);
-    margin: 24px auto 0;
+    /* Bottom margin gives the cards air before the next white section card,
+       which otherwise butts right up against them (they flow after the pin). */
+    margin: 24px auto clamp(56px, 13vw, 96px);
   }
   .pr-sidecard {
     position: static;

@@ -105,7 +105,7 @@ export default function Payroll() {
             collapse (its rect gives cx/cy) — see plan Note 2. */
       const runChoreography = (
         pinEl: HTMLElement,
-        { pullback, endVh, pinType }: { pullback: boolean; endVh: number; pinType?: "transform" | "fixed" },
+        { pullback, endVh, pinType, scrub }: { pullback: boolean; endVh: number; pinType?: "transform" | "fixed"; scrub: number | boolean },
       ) => {
         // Measured each refresh so the scroll targets survive resize/font load.
         let scrollEnd = 0; // content offset at the very bottom of the list
@@ -196,7 +196,13 @@ export default function Payroll() {
             end: () => "+=" + window.innerHeight * endVh,
             pin: pinEl,
             pinSpacing: true,
-            scrub: 0.8,
+            // Desktop uses smoothed scrub (0.8) for a buttery ease. Mobile uses
+            // direct scrub (true): with smoothing, the catch-up tween updates on
+            // rAF while the transform-pin updates on the scroll event, so they
+            // desync by sub-pixels each frame → high-frequency jitter on touch.
+            // Direct scrub sets the timeline from the same scroll value that
+            // moves the pin, keeping them locked together.
+            scrub,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefresh: measure,
@@ -306,7 +312,7 @@ export default function Payroll() {
             landscape tablets / small laptops get the flanked composition instead
             of a small phone marooned in empty side-bands. ── */
       mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
-        runChoreography(stage, { pullback: true, endVh: DESKTOP_END_VH });
+        runChoreography(stage, { pullback: true, endVh: DESKTOP_END_VH, scrub: 0.8 });
       });
 
       /* ── Narrow (<900px): SAME pinned choreography, phone full-size, floaters
@@ -315,7 +321,7 @@ export default function Payroll() {
             just fade in as they scroll into view. pinType:"transform" keeps the
             pin steady on touch. ── */
       mm.add("(max-width: 899px) and (prefers-reduced-motion: no-preference)", () => {
-        runChoreography(pin, { pullback: false, endVh: MOBILE_END_VH, pinType: "transform" });
+        runChoreography(pin, { pullback: false, endVh: MOBILE_END_VH, pinType: "transform", scrub: true });
         gsap.set(sideCardEls, { opacity: 0, y: 24 });
         gsap.to(sideCardEls, {
           opacity: 1,
