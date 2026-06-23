@@ -60,6 +60,7 @@ export default function Payroll() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
+  const pinStickyRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -74,6 +75,7 @@ export default function Payroll() {
       const section = sectionRef.current;
       const stage = stageRef.current;
       const pin = pinRef.current;
+      const pinSticky = pinStickyRef.current;
       const heading = headingRef.current;
       const phone = phoneRef.current;
       const screen = screenRef.current;
@@ -83,7 +85,7 @@ export default function Payroll() {
       const heroRow = heroRowRef.current;
       const counter = counterRef.current;
       if (
-        !section || !stage || !pin || !heading || !phone || !screen || !content ||
+        !section || !stage || !pin || !pinSticky || !heading || !phone || !screen || !content ||
         !floatersWrap || !sideCardsWrap || !heroRow || !counter
       )
         return;
@@ -96,16 +98,19 @@ export default function Payroll() {
 
       const mm = gsap.matchMedia();
 
-      /* ── Shared pinned, scrubbed choreography. Wide (≥900, pullback:true)
-            ends on the resting composition — phone pulls back and the side cards
-            emerge into the side slots. Narrow (<900, pullback:false) reuses the
-            SAME beats: the phone stays scale 1 and the floaters fly in from
-            beyond the viewport edges (CSS), so the phone never has to shrink.
-            pinEl is BOTH the pin target and the coordinate origin for the
-            collapse (its rect gives cx/cy) — see plan Note 2. */
+      /* ── Shared scrubbed choreography. Wide (≥900, usePin:true): ScrollTrigger
+            pins the stage (main-thread) and the phone pulls back as side cards
+            emerge. Narrow (<900, usePin:false): NO ScrollTrigger pin — the phone
+            is pinned by CSS `position: sticky` on .pr-pin-sticky (compositor,
+            smooth on touch); ScrollTrigger only scrubs the timeline.
+            - triggerEl: drives start/end + (desktop) is the pin target.
+            - originEl: the floaters' containing block — the coordinate origin for
+              the collapse. cx/cy and floater rects are read inside it, so the
+              deltas are scroll-invariant and survive the sticky swap unchanged. */
       const runChoreography = (
-        pinEl: HTMLElement,
-        { pullback, endVh, pinType, scrub }: { pullback: boolean; endVh: number; pinType?: "transform" | "fixed"; scrub: number | boolean },
+        triggerEl: HTMLElement,
+        originEl: HTMLElement,
+        { pullback, endVh, pinType, scrub, blurHeading, usePin }: { pullback: boolean; endVh: number; pinType?: "transform" | "fixed"; scrub: number | boolean; blurHeading: boolean; usePin: boolean },
       ) => {
         // Measured each refresh so the scroll targets survive resize/font load.
         let scrollEnd = 0; // content offset at the very bottom of the list
@@ -151,11 +156,11 @@ export default function Payroll() {
             scrollEnd = Math.min(0, -(content.scrollHeight - screenH));
           }
 
-          // cx/cy AND each floater rect are read inside pinEl, so the collapse
+          // cx/cy AND each floater rect are read inside originEl, so the collapse
           // delta is scroll-invariant: a common scroll/pin offset cancels out.
-          // This holds only because the floaters' containing block IS pinEl
-          // (.pr-stage on desktop, .pr-pin on mobile) — see plan Note 2.
-          const pinRect = pinEl.getBoundingClientRect();
+          // This holds only because the floaters' containing block IS originEl
+          // (.pr-stage on desktop, .pr-pin-sticky on mobile) — see plan Note 2.
+          const pinRect = originEl.getBoundingClientRect();
           const cx = pinRect.left + pinRect.width / 2;
           // Collapse target sits a touch BELOW the phone's vertical centre
           // (around the "Payroll details" band) rather than dead centre.
@@ -183,33 +188,40 @@ export default function Payroll() {
         // Driven by its own timeline tween (beat 3.5) — NOT the list scroll — so
         // the count is a clear, readable beat that lands as the cards collapse,
         // exactly as the spec wants ("сумма набегает счётчиком как сумма карточек").
+        // Quantize the per-frame write: the count tween fires onUpdate every
+        // scrub frame, but we only touch the DOM when the formatted string
+        // actually changes. Paired with the reserved width on the hero amount
+        // (CSS, tabular-nums), the text never changes the element's width, so a
+        // write is a cheap repaint — not a relayout of the phone subtree.
         const counterProxy = { v: 0 };
+        let lastCounterText = "";
         const renderCounter = () => {
-          counter.textContent = formatEur(counterProxy.v);
+          const text = formatEur(counterProxy.v);
+          if (text === lastCounterText) return;
+          lastCounterText = text;
+          counter.textContent = text;
         };
 
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            trigger: pinEl,
+            trigger: triggerEl,
             start: "top top",
-            end: () => "+=" + window.innerHeight * endVh,
-            pin: pinEl,
-            pinSpacing: true,
-            // Desktop uses smoothed scrub (0.8) for a buttery ease. Mobile uses
-            // direct scrub (true): with smoothing, the catch-up tween updates on
-            // rAF while the transform-pin updates on the scroll event, so they
-            // desync by sub-pixels each frame → high-frequency jitter on touch.
-            // Direct scrub sets the timeline from the same scroll value that
-            // moves the pin, keeping them locked together.
+            // Desktop pins → reserve the scroll distance via end:"+=". Mobile is
+            // a tall CSS-sticky track → "bottom bottom" scrubs exactly across the
+            // stuck range (auto-matches the track height, no innerHeight guess).
+            end: usePin ? () => "+=" + window.innerHeight * endVh : "bottom bottom",
             scrub,
-            anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefresh: measure,
-            // Mobile uses "transform" pinning (touch-stable); desktop keeps the
-            // default. Combined with ScrollTrigger.config(ignoreMobileResize) up
-            // top, this prevents URL-bar resize jumps. (plan Note 1)
-            ...(pinType ? { pinType } : {}),
+            // Desktop: ScrollTrigger pins the stage on the main thread (fine for
+            // mouse). Mobile: NO ST pin — .pr-pin-sticky is pinned by the
+            // compositor via position:sticky, which doesn't jitter on touch the
+            // way a main-thread transform-pin does. ST here only scrubs the
+            // timeline. (ignoreMobileResize up top still guards URL-bar reflow.)
+            ...(usePin
+              ? { pin: triggerEl, pinSpacing: true, anticipatePin: 1, ...(pinType ? { pinType } : {}) }
+              : {}),
           },
         });
 
@@ -226,7 +238,16 @@ export default function Payroll() {
         // beat 2 (0.10–0.26): heading leaves, the phone enters showing the TOP
         // of the interface (content stays at y:0 — no inner scroll yet), and the
         // transaction cards fade in around the phone.
-        tl.to(heading, { opacity: 0, filter: "blur(14px)", y: -40, scale: 0.96, duration: 0.15 }, 0.10);
+        // Desktop fades the heading out with a blur. Mobile drops the blur:
+        // animating filter:blur is GPU-heavy and shimmers on touch — opacity +
+        // a small lift reads just as clean without the cost.
+        tl.to(
+          heading,
+          blurHeading
+            ? { opacity: 0, filter: "blur(14px)", y: -40, scale: 0.96, duration: 0.15 }
+            : { opacity: 0, y: -24, duration: 0.15 },
+          0.10,
+        );
         tl.to(phone, { opacity: 1, scale: 1, y: 0, duration: 0.15 }, 0.10);
         tl.to(floaters, { opacity: 1, duration: 0.1, stagger: 0.012 }, 0.16);
 
@@ -312,16 +333,18 @@ export default function Payroll() {
             landscape tablets / small laptops get the flanked composition instead
             of a small phone marooned in empty side-bands. ── */
       mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
-        runChoreography(stage, { pullback: true, endVh: DESKTOP_END_VH, scrub: 0.8 });
+        // Desktop: ScrollTrigger pins .pr-stage; it's also the floaters' origin.
+        runChoreography(stage, stage, { pullback: true, endVh: DESKTOP_END_VH, scrub: 0.8, blurHeading: true, usePin: true });
       });
 
-      /* ── Narrow (<900px): SAME pinned choreography, phone full-size, floaters
-            fly in from beyond the viewport edges (CSS). The two capability cards
-            stay static, stacked BELOW the phone (they flow after the pin) and
-            just fade in as they scroll into view. pinType:"transform" keeps the
-            pin steady on touch. ── */
+      /* ── Narrow (<900px): SAME timeline, phone full-size, floaters fly in from
+            beyond the viewport edges (CSS). The phone is pinned by CSS sticky
+            (.pr-pin-sticky), NOT a ScrollTrigger pin — so it stays rock-steady on
+            touch instead of jittering. Trigger is the tall .pr-pin track; origin
+            (floaters' containing block) is .pr-pin-sticky. The two capability
+            cards flow after the full track and fade in as they scroll into view. */
       mm.add("(max-width: 899px) and (prefers-reduced-motion: no-preference)", () => {
-        runChoreography(pin, { pullback: false, endVh: MOBILE_END_VH, pinType: "transform", scrub: true });
+        runChoreography(pin, pinSticky, { pullback: false, endVh: MOBILE_END_VH, scrub: true, blurHeading: false, usePin: false });
         gsap.set(sideCardEls, { opacity: 0, y: 24 });
         gsap.to(sideCardEls, {
           opacity: 1,
@@ -367,10 +390,13 @@ export default function Payroll() {
   return (
     <section className="pr" ref={sectionRef} aria-label="Payroll transactions">
       <div className="pr-stage" ref={stageRef}>
-        {/* The pinned trio: heading + phone + floaters. `display:contents` on
-            desktop (transparent to layout); on mobile it's the real 100svh pin
-            box so .pr-sidecards can flow BELOW it after the pin releases. */}
+        {/* Pin wrapper. Desktop: display:contents (transparent) — ScrollTrigger
+            pins .pr-stage. Mobile: .pr-pin is a TALL track and .pr-pin-sticky is
+            position:sticky inside it, so the phone is pinned by the COMPOSITOR
+            (smooth on touch) instead of a main-thread GSAP transform-pin (which
+            jittered). .pr-sidecards flows after the full track → appears after. */}
         <div className="pr-pin" ref={pinRef}>
+        <div className="pr-pin-sticky" ref={pinStickyRef}>
         <div className="pr-heading" ref={headingRef}>
           <h2 className="section-title pr-title">
             Payroll <span className="accent">transactions</span>
@@ -537,6 +563,7 @@ export default function Payroll() {
             </div>
           ))}
         </div>
+        </div>{/* /.pr-pin-sticky */}
         </div>{/* /.pr-pin */}
 
         <div className="pr-sidecards" ref={sideCardsRef} aria-hidden="true">

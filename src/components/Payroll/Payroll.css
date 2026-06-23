@@ -17,12 +17,20 @@
      border/padding (~12px) and a ~24px gap. 9/19 × 0.86 ÷ 2 ≈ 0.204. */
   --pr-sidecard-inset: calc(min(72vh, 720px) * 0.204 + 36px);
   /* Vertical offset of each side card from the phone's centre: the left card
-     ("Save on fees") sits this far ABOVE centre, near the top border; the right
-     card ("Set it and forget it") this far BELOW, near the bottom border — a
-     mirrored, edge-aligned stagger. Tracks the phone's height (screen is
-     min(72vh,720px) → half is min(36vh,360px)) and lands each card ~16px inside
-     the mockup border. Raise the trailing 96px to pull the cards inward. */
-  --pr-sidecard-shift: calc(min(36vh, 360px) - 96px);
+     ("Save on fees") sits this far ABOVE centre, the right ("Set it and forget
+     it") the same distance BELOW — a tight, symmetric stagger pinned at the
+     device centre, NOT flung out to the top/bottom borders. */
+  --pr-sidecard-shift: 100px;
+  /* The end-state pull-back lifts the phone ~30px above the stage centre that
+     .pr-sidecards is anchored to. Push the side-card anchor down by the same
+     amount so the ±shift pair centres on the DEVICE, not the stage. Measured
+     near-constant (~30px) across 800–1080px viewport heights. Implicitly drops
+     to 0 on mobile, where the cards become a static grid (top:auto). */
+  --pr-phone-lift: 30px;
+  /* NOTE: no overflow here. The mobile pin is position:sticky (.pr-pin-sticky),
+     and overflow on a sticky ANCESTOR can capture/break the stick in some
+     engines. The off-screen floaters are instead clipped at .pr-floaters, which
+     lives INSIDE the sticky element (see below). */
 }
 
 /* The pinned stage. ScrollTrigger pins this for the whole choreography;
@@ -37,10 +45,12 @@
   overflow: visible;
 }
 
-/* Pinned-trio wrapper. Desktop: display:contents → generates no box, so
-   .pr-heading/.pr-floaters keep resolving against .pr-stage and desktop pins
-   .pr-stage unchanged. Narrow turns it into the real pin box (see <900 block). */
+/* Pin wrappers. Desktop: both display:contents → generate no box, so
+   .pr-heading/.pr-phone/.pr-floaters keep resolving against .pr-stage and
+   ScrollTrigger pins .pr-stage unchanged. Narrow (<900) turns .pr-pin into a
+   tall scroll track and .pr-pin-sticky into a position:sticky pin box. */
 .pr-pin { display: contents; }
+.pr-pin-sticky { display: contents; }
 
 /* ── Intro heading (fades + blurs away on scroll) ───────────────── */
 .pr-heading {
@@ -346,6 +356,16 @@
 }
 .pr-row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 1cqw; white-space: nowrap; }
 .pr-row-amount { font-weight: 700; font-size: 4cqw; font-variant-numeric: tabular-nums; }
+/* Hero row is the count-up target (€0.00 → €5,130.89). Reserve its width so the
+   growing string never changes the element's width and relayouts the row each
+   scrub frame; tabular-nums (above) keeps digits equal-width, min-width fits the
+   final value (in cqw → scales with the phone). inline-block so min-width applies;
+   text-align:right keeps the number pinned to the right as it grows. */
+.pr-row-hero .pr-row-amount {
+  display: inline-block;
+  min-width: 24cqw;
+  text-align: right;
+}
 .pr-row-status { font-family: 'Inter', system-ui, sans-serif; font-size: 3.2cqw; color: #06a621; }
 
 .pr-showmore {
@@ -443,13 +463,10 @@
   inset: 0;
   z-index: 7;
   pointer-events: none;
-  /* Clip the floaters to the stage/pin box. On mobile they start off-screen
-     (left:-12%/116%) before flying in; without this they widen the document and
-     create phantom horizontal scroll (fails tests/rendering.spec.ts and breaks
-     mobile tap targets like the cookie banner). `hidden` is used over `clip`
-     for WebKit/Safari, where `overflow-x: clip` did not contain the overflow.
-     This layer only holds the (always-inside) floaters, so clipping both axes
-     is safe and never shows a scrollbar (pointer-events:none, fixed inset:0). */
+  /* Clip the off-screen floater starts (mobile left:-24%/130%) here. This layer
+     lives INSIDE .pr-pin-sticky, so clipping contains the document width WITHOUT
+     putting overflow on a sticky ancestor (which could break position:sticky).
+     Safe: pointer-events:none, fixed inset:0 — never shows a scrollbar. */
   overflow: hidden;
 }
 .pr-floater {
@@ -516,8 +533,8 @@
   opacity: 1;
   will-change: transform, opacity;
 }
-.pr-sidecard-left  { right: calc(50% + var(--pr-sidecard-inset)); left: auto; top: calc(50% - var(--pr-sidecard-shift)); }
-.pr-sidecard-right { left:  calc(50% + var(--pr-sidecard-inset)); right: auto; top: calc(50% + var(--pr-sidecard-shift)); }
+.pr-sidecard-left  { right: calc(50% + var(--pr-sidecard-inset)); left: auto; top: calc(50% + var(--pr-phone-lift) - var(--pr-sidecard-shift)); }
+.pr-sidecard-right { left:  calc(50% + var(--pr-sidecard-inset)); right: auto; top: calc(50% + var(--pr-phone-lift) + var(--pr-sidecard-shift)); }
 .pr-sidecard-img {
   position: absolute;
   top: -40px;
@@ -595,11 +612,23 @@
   .pr-screen { height: min(82vh, 680px); }
 }
 
-/* Motion-allowed narrow: the real pin box + off-screen card starts. */
+/* Motion-allowed narrow: CSS-sticky pin (compositor) + off-screen card starts. */
 @media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
+  /* .pr-pin is the TALL scroll track; .pr-pin-sticky pins across the extra
+     viewports. The phone is held by the COMPOSITOR (position:sticky), not a
+     main-thread GSAP transform-pin — that's the jitter fix ported from the hero
+     (which never main-thread-pins). ScrollTrigger here only scrubs the timeline
+     (end:"bottom bottom" auto-matches this track height). */
   .pr-pin {
-    position: relative;   /* REQUIRED: makes .pr-pin the floaters' containing block (plan Note 2) */
-    height: 100svh;       /* svh, not vh — the mobile URL bar must not reflow the pin (plan Note 1) */
+    position: relative;
+    /* (1 + MOBILE_END_VH 2.8) × 100svh — keep the 2.8 in sync with Payroll.tsx.
+       svh, not vh, so the URL bar doesn't reflow the track (plan Note 1). */
+    height: 380svh;
+  }
+  .pr-pin-sticky {
+    position: sticky;     /* compositor pin — no main-thread chase, no touch jitter */
+    top: 0;
+    height: 100svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -611,9 +640,10 @@
     transform: translate(-50%, -50%);
     width: min(90vw, 560px);
     padding: 0;
+    will-change: transform, opacity;   /* no filter on mobile — heading no longer blurs */
   }
   .pr-title { font-size: clamp(2rem, 8vw, 2.9rem); }   /* wraps within 90vw */
-  .pr-floaters { display: block; }                     /* un-hide; inset:0 → resolves against .pr-pin */
+  .pr-floaters { display: block; }                     /* un-hide; inset:0 → resolves against .pr-pin-sticky */
 
   /* Off-screen starts — three per edge, staggered in height. With
      translate(-50%,-50%), a centre at left:-24%/124% sits fully off-screen, so
