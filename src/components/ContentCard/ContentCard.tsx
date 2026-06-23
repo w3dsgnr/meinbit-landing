@@ -97,7 +97,7 @@ function TrustSection() {
               <div className="stat-label">Countries available</div>
             </div>
             <div className="stat">
-              <div className="stat-value">Institution-grade</div>
+              <div className="stat-value">Bulletproof</div>
               <div className="stat-label">Security &amp; encryption</div>
             </div>
             <div className="stat">
