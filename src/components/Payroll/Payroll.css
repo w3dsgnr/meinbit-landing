@@ -9,10 +9,13 @@
   position: relative;
   z-index: 1;
   /* Horizontal inset of each side card's inner edge from the phone's centre.
-     ≈ half the phone's real outer width at scale 0.86 + a ~24px gap. The Figma
-     screen is 402px and .pr-device adds padding+border, so tune this ONE number
-     to the measured .pr-phone half-width@0.86 rather than guessing a calc. */
-  --pr-sidecard-inset: 210px;
+     ≈ half the phone's real outer width at scale 0.86 + a ~24px gap. Derived
+     from the phone height rather than hardcoded so the gap stays constant at
+     every width from the 900px flanking breakpoint up (a fixed px floated the
+     cards too far out on shorter/narrower viewports). Phone screen width =
+     min(72vh,720px) × 9/19; ×0.86 (pull-back scale); ÷2 (half); + device
+     border/padding (~12px) and a ~24px gap. 9/19 × 0.86 ÷ 2 ≈ 0.204. */
+  --pr-sidecard-inset: calc(min(72vh, 720px) * 0.204 + 36px);
   /* Vertical offset of each side card from the phone's centre: the left card
      ("Save on fees") sits this far ABOVE centre, near the top border; the right
      card ("Set it and forget it") this far BELOW, near the bottom border — a
@@ -36,7 +39,7 @@
 
 /* Pinned-trio wrapper. Desktop: display:contents → generates no box, so
    .pr-heading/.pr-floaters keep resolving against .pr-stage and desktop pins
-   .pr-stage unchanged. Mobile turns it into the real pin box (see <1100 block). */
+   .pr-stage unchanged. Narrow turns it into the real pin box (see <900 block). */
 .pr-pin { display: contents; }
 
 /* ── Intro heading (fades + blurs away on scroll) ───────────────── */
@@ -440,6 +443,14 @@
   inset: 0;
   z-index: 7;
   pointer-events: none;
+  /* Clip the floaters to the stage/pin box. On mobile they start off-screen
+     (left:-12%/116%) before flying in; without this they widen the document and
+     create phantom horizontal scroll (fails tests/rendering.spec.ts and breaks
+     mobile tap targets like the cookie banner). `hidden` is used over `clip`
+     for WebKit/Safari, where `overflow-x: clip` did not contain the overflow.
+     This layer only holds the (always-inside) floaters, so clipping both axes
+     is safe and never shows a scrollbar (pointer-events:none, fixed inset:0). */
+  overflow: hidden;
 }
 .pr-floater {
   position: absolute;
@@ -483,7 +494,7 @@
 .pr-floater-5 { left: 83%; top: 78%; }
 
 /* ── Capability cards flanking the phone (scaled-down .banner-card) ──────────
-   Default = the ≥1100px side-slot layout: absolute, vertically centred, anchored
+   Default = the ≥900px side-slot layout: absolute, vertically centred, anchored
    a fixed inset from the phone centre. Behind the phone (z-index 4 < phone's 5)
    so they emerge from behind it. opacity:1 is the resting state; the animated
    contexts set opacity:0 before first paint, so static branches need no override. */
@@ -532,12 +543,12 @@
   margin: 0;
 }
 
-/* ── Mobile (<1100px): the SAME pinned choreography as desktop, ported via
-      gsap.matchMedia(). Split into a base layer (also the reduced-motion-safe
+/* ── Narrow (<900px): the SAME pinned choreography as the wide layout, ported
+      via gsap.matchMedia(). Split into a base layer (also the reduced-motion-safe
       layout) and a `prefers-reduced-motion: no-preference` layer that builds the
-      pin box + un-hides the floaters. The side slots can't fit beside the phone,
-      so the capability cards stack in a grid BELOW the pin. ──────────────────── */
-@media (max-width: 1099px) {
+      pin box + un-hides the floaters. The side slots can't fit beside the phone
+      below 900px, so the capability cards stack in a grid BELOW the pin. ──────── */
+@media (max-width: 899px) {
   .pr-stage {
     height: auto;
     display: block;
@@ -547,6 +558,11 @@
   /* Base / reduced-motion-safe: no pin box — phone sits in flow, cards directly
      below (never a tall empty 100svh box). The no-preference layer upgrades it. */
   .pr-pin { display: block; height: auto; }
+  /* Centre the phone horizontally in BOTH motion modes. The no-preference layer
+     flex-centres .pr-pin, but the reduced-motion layer leaves it display:block,
+     where a full-width .pr-phone left-aligns the device (it was jammed against
+     the left edge on tablets). max-content + auto margins centre it either way. */
+  .pr-phone { width: max-content; margin-inline: auto; }
   .pr-screen { height: min(78vh, 560px); }
   .pr-floaters { display: none; }   /* shown only when motion is allowed */
 
@@ -570,8 +586,15 @@
   .pr-sidecard-right { left: auto; right: auto; top: auto; }
 }
 
-/* Motion-allowed mobile: the real pin box + off-screen card starts. */
-@media (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+/* Portrait tablets (768–899px): the phone is centred with cards stacked below.
+   Give it more height so it fills the column instead of looking like a small
+   mockup marooned in empty side-bands. */
+@media (min-width: 768px) and (max-width: 899px) {
+  .pr-screen { height: min(82vh, 680px); }
+}
+
+/* Motion-allowed narrow: the real pin box + off-screen card starts. */
+@media (max-width: 899px) and (prefers-reduced-motion: no-preference) {
   .pr-pin {
     position: relative;   /* REQUIRED: makes .pr-pin the floaters' containing block (plan Note 2) */
     height: 100svh;       /* svh, not vh — the mobile URL bar must not reflow the pin (plan Note 1) */

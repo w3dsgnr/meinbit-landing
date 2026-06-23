@@ -50,7 +50,7 @@ const sideCards = [
     4. the rest of the list lazy-reveals and the whole interface scrolls inside
        the clipped phone screen to the bottom
 
-  Mobile (<1100px) reuses the SAME choreography (shared runChoreography) but
+  Narrow (<900px) reuses the SAME choreography (shared runChoreography) but
   without the phone pull-back — the floaters fly in from beyond the viewport
   edges so the phone stays full-size. Reduced-motion gets static branches.
   The hero row (July · Jul 1 – Jul 12 · €5,130.89) is the collapse target and
@@ -96,9 +96,9 @@ export default function Payroll() {
 
       const mm = gsap.matchMedia();
 
-      /* ── Shared pinned, scrubbed choreography. Desktop (≥1100, pullback:true)
+      /* ── Shared pinned, scrubbed choreography. Wide (≥900, pullback:true)
             ends on the resting composition — phone pulls back and the side cards
-            emerge into the side slots. Mobile (<1100, pullback:false) reuses the
+            emerge into the side slots. Narrow (<900, pullback:false) reuses the
             SAME beats: the phone stays scale 1 and the floaters fly in from
             beyond the viewport edges (CSS), so the phone never has to shrink.
             pinEl is BOTH the pin target and the coordinate origin for the
@@ -301,18 +301,20 @@ export default function Payroll() {
         }
       };
 
-      /* ── Wide desktop (≥1100px): full choreography — phone pulls back and the
-            side cards emerge into the side slots. ── */
-      mm.add("(min-width: 1100px) and (prefers-reduced-motion: no-preference)", () => {
+      /* ── Wide (≥900px): full choreography — phone pulls back and the side
+            cards emerge into the side slots beside it. Lowered from 1100→900 so
+            landscape tablets / small laptops get the flanked composition instead
+            of a small phone marooned in empty side-bands. ── */
+      mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
         runChoreography(stage, { pullback: true, endVh: DESKTOP_END_VH });
       });
 
-      /* ── Mobile (<1100px): SAME pinned choreography, phone full-size, floaters
+      /* ── Narrow (<900px): SAME pinned choreography, phone full-size, floaters
             fly in from beyond the viewport edges (CSS). The two capability cards
             stay static, stacked BELOW the phone (they flow after the pin) and
             just fade in as they scroll into view. pinType:"transform" keeps the
             pin steady on touch. ── */
-      mm.add("(max-width: 1099px) and (prefers-reduced-motion: no-preference)", () => {
+      mm.add("(max-width: 899px) and (prefers-reduced-motion: no-preference)", () => {
         runChoreography(pin, { pullback: false, endVh: MOBILE_END_VH, pinType: "transform" });
         gsap.set(sideCardEls, { opacity: 0, y: 24 });
         gsap.to(sideCardEls, {
@@ -325,10 +327,10 @@ export default function Payroll() {
         });
       });
 
-      /* ── Reduced motion, wide (≥1100px): static side-slot poster. The heading
+      /* ── Reduced motion, wide (≥900px): static side-slot poster. The heading
             is intentionally hidden and the list is intentionally NOT pre-scrolled
             (it rests at y:0, shown from the top) — a deliberate still, not a bug. */
-      mm.add("(min-width: 1100px) and (prefers-reduced-motion: reduce)", () => {
+      mm.add("(min-width: 900px) and (prefers-reduced-motion: reduce)", () => {
         counter.textContent = formatEur(heroTotal);
         gsap.set(heading, { opacity: 0 });          // deliberately hidden; kept in DOM for a11y
         gsap.set(phone, { scale: 0.86 });            // final scale → keeps the side-card clearance valid
@@ -336,10 +338,10 @@ export default function Payroll() {
         gsap.set([heroRow, ...nonHeroRows, ...sideCardEls], { opacity: 1, clearProps: "transform,filter" });
       });
 
-      /* ── Reduced motion, narrow (<1100px): static stacked composition. The
+      /* ── Reduced motion, narrow (<900px): static stacked composition. The
             heading is absolute inside .pr-pin, so a visible one would overlap the
-            phone — hide it (matches the desktop reduced-motion choice). ── */
-      mm.add("(max-width: 1099px) and (prefers-reduced-motion: reduce)", () => {
+            phone — hide it (matches the wide reduced-motion choice). ── */
+      mm.add("(max-width: 899px) and (prefers-reduced-motion: reduce)", () => {
         counter.textContent = formatEur(heroTotal);
         gsap.set(heading, { opacity: 0 });          // deliberately hidden; kept in DOM for a11y
         gsap.set([phone, heroRow, ...nonHeroRows, ...sideCardEls], {
