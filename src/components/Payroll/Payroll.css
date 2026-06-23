@@ -34,6 +34,11 @@
   overflow: visible;
 }
 
+/* Pinned-trio wrapper. Desktop: display:contents → generates no box, so
+   .pr-heading/.pr-floaters keep resolving against .pr-stage and desktop pins
+   .pr-stage unchanged. Mobile turns it into the real pin box (see <1100 block). */
+.pr-pin { display: contents; }
+
 /* ── Intro heading (fades + blurs away on scroll) ───────────────── */
 .pr-heading {
   position: absolute;
@@ -527,25 +532,23 @@
   margin: 0;
 }
 
-/* ── Narrow (<1100px): no pin/scrub — the resting composition stacks. The side
-      slots can't fit beside the phone here, so the cards drop into a grid below
-      it (visible, never hidden). The collapse choreography (floaters) is a
-      wide-desktop device only. ──────────────────────────────────────────────── */
+/* ── Mobile (<1100px): the SAME pinned choreography as desktop, ported via
+      gsap.matchMedia(). Split into a base layer (also the reduced-motion-safe
+      layout) and a `prefers-reduced-motion: no-preference` layer that builds the
+      pin box + un-hides the floaters. The side slots can't fit beside the phone,
+      so the capability cards stack in a grid BELOW the pin. ──────────────────── */
 @media (max-width: 1099px) {
   .pr-stage {
     height: auto;
-    flex-direction: column;
-    gap: 28px;
-    padding: 72px 0;
+    display: block;
+    padding: 0;
+    overflow: visible;
   }
-  .pr-heading {
-    position: static;
-    transform: none;
-    width: auto;
-    padding: 0 20px;
-  }
+  /* Base / reduced-motion-safe: no pin box — phone sits in flow, cards directly
+     below (never a tall empty 100svh box). The no-preference layer upgrades it. */
+  .pr-pin { display: block; height: auto; }
   .pr-screen { height: min(78vh, 560px); }
-  .pr-floaters { display: none; }   /* decorative animation device only */
+  .pr-floaters { display: none; }   /* shown only when motion is allowed */
 
   .pr-sidecards {
     position: static;
@@ -555,7 +558,6 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
     width: min(92vw, 600px);
-    /* stage gap (28) + margin (24) − image overhang (40) ≈ 12px clear of the phone */
     margin: 24px auto 0;
   }
   .pr-sidecard {
@@ -566,6 +568,46 @@
   }
   .pr-sidecard-left,
   .pr-sidecard-right { left: auto; right: auto; top: auto; }
+}
+
+/* Motion-allowed mobile: the real pin box + off-screen card starts. */
+@media (max-width: 1099px) and (prefers-reduced-motion: no-preference) {
+  .pr-pin {
+    position: relative;   /* REQUIRED: makes .pr-pin the floaters' containing block (plan Note 2) */
+    height: 100svh;       /* svh, not vh — the mobile URL bar must not reflow the pin (plan Note 1) */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pr-heading {           /* absolute + constrained width = the heading-overflow fix */
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(90vw, 560px);
+    padding: 0;
+  }
+  .pr-title { font-size: clamp(2rem, 8vw, 2.9rem); }   /* wraps within 90vw */
+  .pr-floaters { display: block; }                     /* un-hide; inset:0 → resolves against .pr-pin */
+
+  /* Off-screen starts — three per edge, staggered in height. With
+     translate(-50%,-50%), a centre at left:-24%/124% sits fully off-screen, so
+     each card flies IN across the edge. */
+  .pr-floater-0 { left: -24%; top: 26%; }
+  .pr-floater-1 { left: -30%; top: 50%; }
+  .pr-floater-2 { left: -24%; top: 74%; }
+  .pr-floater-3 { left: 124%; top: 30%; }
+  .pr-floater-4 { left: 130%; top: 54%; }
+  .pr-floater-5 { left: 124%; top: 78%; }
+}
+
+/* Narrow phones: pull the off-edge start inward so the fly-in reads instead of
+   launching from a half-empty screen (plan Note 5). */
+@media (max-width: 560px) and (prefers-reduced-motion: no-preference) {
+  .pr-floater-0, .pr-floater-2 { left: -12%; }
+  .pr-floater-1               { left: -16%; }
+  .pr-floater-3, .pr-floater-5 { left: 112%; }
+  .pr-floater-4               { left: 116%; }
 }
 
 @media (max-width: 560px) {

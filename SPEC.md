@@ -34,7 +34,7 @@ Figma node (экран payroll): https://www.figma.com/design/TYK7HUWMrnEeNd2xdq
 - Анимировать только `transform` / `opacity` (+ `filter` для блюра заголовка). `will-change` на анимируемых.
 - React-чистка: `useGSAP` / `gsap.context().revert()`.
 - `prefers-reduced-motion`: показывать финальное состояние (телефон со списком) сразу, без проигрывания.
-- Мобайл (<768px): упрощённая ветка через `gsap.matchMedia()` — без пина и scrub; телефон и список появляются лёгким fade/въездом, без внутреннего скролл-джекинга.
+- Мобайл (<1100px): портируем ту же **pinned+scrub** раскадровку через `gsap.matchMedia()` (общий `runChoreography`), с тремя отличиями: (1) краевые карточки влетают **из-за краёв вьюпорта**, (2) телефон **не уменьшается** (без pull-back, scale 1), (3) две капабилити-карточки — **статично стопкой под телефоном** (не уезжают в боковые слоты). Pin: `pinType:"transform"` + `ScrollTrigger.config({ ignoreMobileResize:true })`, высота пин-бокса `100svh`. `prefers-reduced-motion` (мобайл): без пина, `.pr-pin { height:auto }`, финальное состояние сразу.
 - GSAP и плагины (ScrollTrigger, Flip) — бесплатные, ставить из npm.
 
 ## Вне скоупа (сейчас НЕ делаем)

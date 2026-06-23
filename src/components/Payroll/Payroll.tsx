@@ -7,6 +7,16 @@ import "./Payroll.css";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+// Visual-viewport micro-resizes (mobile URL bar show/hide) must not refresh
+// ScrollTrigger, or the pin jumps. Set once at module load. (plan Note 1)
+ScrollTrigger.config({ ignoreMobileResize: true });
+
+// Pin scroll distance as a multiple of viewport height — tuning params.
+// Mobile is a starting value (cards fly in from off-screen + collapse + counter
+// + full inner list scroll must all fit); finalise in the browser. (plan Note 3)
+const DESKTOP_END_VH = 3.2;
+const MOBILE_END_VH = 2.8;
+
 const heroTotal = payrollTxns.reduce((sum, t) => sum + t.eur, 0);
 const formatEur = (n: number) =>
   "€" + n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -40,13 +50,16 @@ const sideCards = [
     4. the rest of the list lazy-reveals and the whole interface scrolls inside
        the clipped phone screen to the bottom
 
-  Mobile (<768px) and reduced-motion get simplified branches via matchMedia.
+  Mobile (<1100px) reuses the SAME choreography (shared runChoreography) but
+  without the phone pull-back — the floaters fly in from beyond the viewport
+  edges so the phone stays full-size. Reduced-motion gets static branches.
   The hero row (July · Jul 1 – Jul 12 · €5,130.89) is the collapse target and
   the counter target; its total equals the sum of the floating transaction cards.
 */
 export default function Payroll() {
   const sectionRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
   const phoneRef = useRef<HTMLDivElement>(null);
   const screenRef = useRef<HTMLDivElement>(null);
@@ -60,6 +73,7 @@ export default function Payroll() {
     () => {
       const section = sectionRef.current;
       const stage = stageRef.current;
+      const pin = pinRef.current;
       const heading = headingRef.current;
       const phone = phoneRef.current;
       const screen = screenRef.current;
@@ -69,7 +83,7 @@ export default function Payroll() {
       const heroRow = heroRowRef.current;
       const counter = counterRef.current;
       if (
-        !section || !stage || !heading || !phone || !screen || !content ||
+        !section || !stage || !pin || !heading || !phone || !screen || !content ||
         !floatersWrap || !sideCardsWrap || !heroRow || !counter
       )
         return;
@@ -82,9 +96,17 @@ export default function Payroll() {
 
       const mm = gsap.matchMedia();
 
-      /* ── Wide desktop (≥1100px): full pinned, scrubbed choreography,
-            ending on the resting composition (phone pulled back + side cards). */
-      mm.add("(min-width: 1100px) and (prefers-reduced-motion: no-preference)", () => {
+      /* ── Shared pinned, scrubbed choreography. Desktop (≥1100, pullback:true)
+            ends on the resting composition — phone pulls back and the side cards
+            emerge into the side slots. Mobile (<1100, pullback:false) reuses the
+            SAME beats: the phone stays scale 1 and the floaters fly in from
+            beyond the viewport edges (CSS), so the phone never has to shrink.
+            pinEl is BOTH the pin target and the coordinate origin for the
+            collapse (its rect gives cx/cy) — see plan Note 2. */
+      const runChoreography = (
+        pinEl: HTMLElement,
+        { pullback, endVh, pinType }: { pullback: boolean; endVh: number; pinType?: "transform" | "fixed" },
+      ) => {
         // Measured each refresh so the scroll targets survive resize/font load.
         let scrollEnd = 0; // content offset at the very bottom of the list
 
@@ -93,10 +115,14 @@ export default function Payroll() {
         // base x/y when deriving each card's scattered centre.
         gsap.set(floaters, { opacity: 0, xPercent: -50, yPercent: -50, x: 0, y: 0, scale: 1 });
 
-        // Side cards start hidden, tucked toward (behind) the phone — they emerge
-        // outward to their slots in beat 4. yPercent:-50 mirrors the CSS
-        // translateY(-50%) so they ride the phone's vertical centre as it scales.
-        gsap.set(sideCardEls, { opacity: 0, yPercent: -50, scale: 0.92, x: (i: number) => (i === 0 ? 60 : -60) });
+        // Desktop only: side cards start hidden, tucked toward (behind) the
+        // phone — they emerge outward to their slots in beat 4. yPercent:-50
+        // mirrors the CSS translateY(-50%) so they ride the phone's centre as it
+        // scales. On mobile the cards stay static below the phone, revealed by a
+        // light fade in the mobile branch — so we don't touch them here.
+        if (pullback) {
+          gsap.set(sideCardEls, { opacity: 0, yPercent: -50, scale: 0.92, x: (i: number) => (i === 0 ? 60 : -60) });
+        }
 
         // Per-floater pixel delta from its scattered centre to the phone centre,
         // recomputed every refresh so the collapse is a pure transform tween that
@@ -125,11 +151,15 @@ export default function Payroll() {
             scrollEnd = Math.min(0, -(content.scrollHeight - screenH));
           }
 
-          const stageRect = stage.getBoundingClientRect();
-          const cx = stageRect.left + stageRect.width / 2;
+          // cx/cy AND each floater rect are read inside pinEl, so the collapse
+          // delta is scroll-invariant: a common scroll/pin offset cancels out.
+          // This holds only because the floaters' containing block IS pinEl
+          // (.pr-stage on desktop, .pr-pin on mobile) — see plan Note 2.
+          const pinRect = pinEl.getBoundingClientRect();
+          const cx = pinRect.left + pinRect.width / 2;
           // Collapse target sits a touch BELOW the phone's vertical centre
           // (around the "Payroll details" band) rather than dead centre.
-          const cy = stageRect.top + stageRect.height / 2 + screenH * 0.16;
+          const cy = pinRect.top + pinRect.height / 2 + screenH * 0.16;
           floaters.forEach((f, i) => {
             const r = f.getBoundingClientRect();
             // Strip any transform already applied so we always derive the
@@ -161,15 +191,19 @@ export default function Payroll() {
         const tl = gsap.timeline({
           defaults: { ease: "none" },
           scrollTrigger: {
-            trigger: stage,
+            trigger: pinEl,
             start: "top top",
-            end: () => "+=" + window.innerHeight * 3.2,
-            pin: stage,
+            end: () => "+=" + window.innerHeight * endVh,
+            pin: pinEl,
             pinSpacing: true,
             scrub: 0.8,
             anticipatePin: 1,
             invalidateOnRefresh: true,
             onRefresh: measure,
+            // Mobile uses "transform" pinning (touch-stable); desktop keeps the
+            // default. Combined with ScrollTrigger.config(ignoreMobileResize) up
+            // top, this prevents URL-bar resize jumps. (plan Note 1)
+            ...(pinType ? { pinType } : {}),
           },
         });
 
@@ -253,39 +287,34 @@ export default function Payroll() {
         );
         tl.to(nonHeroRows, { opacity: 1, y: 0, duration: 0.25, stagger: { each: 0.006 } }, scrollStart + 0.01);
 
-        // beat 4 also: the phone pulls back (scales down) while two capability
-        // cards rise out from behind it into the side slots — reframing "this one
-        // screen" as part of a larger system. The content scroll above is in the
-        // phone's local space, so the inner list still lands 20px above the tab
-        // bar regardless of this outer scale.
-        tl.to(phone, { scale: 0.86, duration: 1 - scrollStart, ease: "power1.inOut" }, scrollStart);
-        tl.to(
-          sideCardEls,
-          { opacity: 1, x: 0, scale: 1, duration: 0.22, stagger: 0.06, ease: "power2.out" },
-          scrollStart + 0.05,
-        );
+        // beat 4 (desktop only): the phone pulls back (scales down) while two
+        // capability cards rise out from behind it into the side slots. On mobile
+        // (pullback:false) the phone stays scale 1 and the side cards live static
+        // below the phone, so neither tween runs — the phone never shrinks.
+        if (pullback) {
+          tl.to(phone, { scale: 0.86, duration: 1 - scrollStart, ease: "power1.inOut" }, scrollStart);
+          tl.to(
+            sideCardEls,
+            { opacity: 1, x: 0, scale: 1, duration: 0.22, stagger: 0.06, ease: "power2.out" },
+            scrollStart + 0.05,
+          );
+        }
+      };
+
+      /* ── Wide desktop (≥1100px): full choreography — phone pulls back and the
+            side cards emerge into the side slots. ── */
+      mm.add("(min-width: 1100px) and (prefers-reduced-motion: no-preference)", () => {
+        runChoreography(stage, { pullback: true, endVh: DESKTOP_END_VH });
       });
 
-      /* ── Narrow (<1100px): no pin — the resting composition stacks (phone +
-            both cards below it) and reveals on scroll with a light fade. ── */
+      /* ── Mobile (<1100px): SAME pinned choreography, phone full-size, floaters
+            fly in from beyond the viewport edges (CSS). The two capability cards
+            stay static, stacked BELOW the phone (they flow after the pin) and
+            just fade in as they scroll into view. pinType:"transform" keeps the
+            pin steady on touch. ── */
       mm.add("(max-width: 1099px) and (prefers-reduced-motion: no-preference)", () => {
-        counter.textContent = formatEur(heroTotal);
-        gsap.set([heading, phone], { opacity: 0, y: 30 });
+        runChoreography(pin, { pullback: false, endVh: MOBILE_END_VH, pinType: "transform" });
         gsap.set(sideCardEls, { opacity: 0, y: 24 });
-        gsap.to(heading, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: "power2.out",
-          scrollTrigger: { trigger: section, start: "top 82%" },
-        });
-        gsap.to(phone, {
-          opacity: 1,
-          y: 0,
-          duration: 0.7,
-          ease: "power2.out",
-          scrollTrigger: { trigger: phone, start: "top 88%" },
-        });
         gsap.to(sideCardEls, {
           opacity: 1,
           y: 0,
@@ -307,10 +336,13 @@ export default function Payroll() {
         gsap.set([heroRow, ...nonHeroRows, ...sideCardEls], { opacity: 1, clearProps: "transform,filter" });
       });
 
-      /* ── Reduced motion, narrow (<1100px): static stacked composition. ── */
+      /* ── Reduced motion, narrow (<1100px): static stacked composition. The
+            heading is absolute inside .pr-pin, so a visible one would overlap the
+            phone — hide it (matches the desktop reduced-motion choice). ── */
       mm.add("(max-width: 1099px) and (prefers-reduced-motion: reduce)", () => {
         counter.textContent = formatEur(heroTotal);
-        gsap.set([heading, phone, heroRow, ...nonHeroRows, ...sideCardEls], {
+        gsap.set(heading, { opacity: 0 });          // deliberately hidden; kept in DOM for a11y
+        gsap.set([phone, heroRow, ...nonHeroRows, ...sideCardEls], {
           opacity: 1,
           clearProps: "transform,filter",
         });
@@ -327,6 +359,10 @@ export default function Payroll() {
   return (
     <section className="pr" ref={sectionRef} aria-label="Payroll transactions">
       <div className="pr-stage" ref={stageRef}>
+        {/* The pinned trio: heading + phone + floaters. `display:contents` on
+            desktop (transparent to layout); on mobile it's the real 100svh pin
+            box so .pr-sidecards can flow BELOW it after the pin releases. */}
+        <div className="pr-pin" ref={pinRef}>
         <div className="pr-heading" ref={headingRef}>
           <h2 className="section-title pr-title">
             Payroll <span className="accent">transactions</span>
@@ -493,6 +529,7 @@ export default function Payroll() {
             </div>
           ))}
         </div>
+        </div>{/* /.pr-pin */}
 
         <div className="pr-sidecards" ref={sideCardsRef} aria-hidden="true">
           {sideCards.map((c) => (
