@@ -79,7 +79,7 @@ export const fiatBlocks = [
       {
         icon: "ti-arrows-exchange",
         title: "SEPA & SWIFT transfers",
-        body: "Move money across borders at bank-grade speed with transparent, low fees and live exchange rates.",
+        body: "Move money across borders at high speed with transparent, low fees and live exchange rates.",
       },
       {
         icon: "ti-credit-card",
@@ -177,7 +177,7 @@ export const faqItems = [
   },
   {
     q: "Why is identity verification required?",
-    a: "KYC (Know Your Customer) verification is required by financial regulations to prevent fraud and money laundering. It also unlocks higher transaction limits and the ability to issue a bank card. We use advanced ML technology to make the process fast and secure.",
+    a: "KYC (Know Your Customer) verification is required by financial regulations to prevent fraud and money laundering. It also unlocks higher transaction limits and the ability to issue a payment card. We use advanced ML technology to make the process fast and secure.",
   },
   {
     q: "What cards does MeinBit offer?",
@@ -204,3 +204,84 @@ export const faqItems = [
     a: "In-app support is available 24/7 via the chat button. You can also reach us through the Support page on our website. For regulatory or compliance inquiries, contact LUNTRA sp. z o.o. directly.",
   },
 ] as const;
+
+/* ── Payroll section (scroll-animated) ─────────────────────────────
+   Domain model: ONE payroll row = a batch of many individual transfers
+   sent in a single run. `payrollTxns` are the individual transfers that
+   collapse into the first "hero" payroll row — their EUR values
+   sum to that row's total, €5,130.89, which the counter animates up to.
+   Token icons reuse the crypto-section assets in /public. */
+export type PayrollTxn = { name: string; image: string; crypto: string; eur: number };
+
+export const payrollTxns: readonly PayrollTxn[] = [
+  { name: "Ethan C.", image: "/Ethereum%20(ETH).png",       crypto: "-0.363 ETH",  eur: 1180.40 },
+  { name: "Maya R.",  image: "/USD%20Coin%20(USDC).png",    crypto: "-1,241 USDC", eur: 1142.00 },
+  { name: "Liam K.",  image: "/Solana%20(SOL).png",         crypto: "-5.14 SOL",   eur: 863.25 },
+  { name: "Noah B.",  image: "/Bitcoin%20(BTC).png",        crypto: "-0.0115 BTC", eur: 720.50 },
+  { name: "Sofia M.", image: "/TRON%20(TRX).png",           crypto: "-5,842 TRX",  eur: 654.30 },
+  { name: "Ava T.",   image: "/Binance%20Coin%20(BNB).png", crypto: "-1.008 BNB",  eur: 570.44 },
+];
+
+export type PayrollRow = { period: string; amount: string; payDate: string; paychecks?: number };
+export type PayrollGroup = { month: string; rows: readonly PayrollRow[] };
+
+// Mock payroll history transcribed from the Figma list (node 0:625):
+// 8 month groups / 17 rows. Each row = one payroll run (a batch of
+// paychecks), shown as "Regular {period}" + "{n} paychecks, Pay date
+// {payDate}". The first row is the "hero": its €5,130.89 equals the sum
+// of `payrollTxns`, which the scroll counter animates up to.
+export const payrollGroups: readonly PayrollGroup[] = [
+  {
+    month: "July",
+    rows: [
+      { period: "Jul 1 – Jul 12",  amount: "€5,130.89", payDate: "Fri, Jul 19" },
+      { period: "Jul 17 – Jul 28", amount: "€8,542.42", payDate: "Fri, Aug 2" },
+    ],
+  },
+  {
+    month: "June",
+    rows: [{ period: "Jun 3 – Jun 14", amount: "€7,412.27", payDate: "Fri, Jun 21" }],
+  },
+  {
+    month: "May",
+    rows: [
+      { period: "May 20 – May 31", amount: "€8,630.15", payDate: "Fri, Jun 7" },
+      { period: "May 6 – May 17",  amount: "€5,723.96", payDate: "Fri, May 24" },
+      { period: "May 1 – May 5",   amount: "€5,723.96", payDate: "Fri, May 11" },
+      { period: "Apr 20 – Apr 31", amount: "€8,630.15", payDate: "Fri, May 1" },
+    ],
+  },
+  {
+    month: "April",
+    rows: [
+      { period: "Apr 6 – Apr 17",  amount: "€5,723.96", payDate: "Fri, Apr 24" },
+      { period: "Mar 23 – Apr 5",  amount: "€7,150.40", payDate: "Fri, Apr 17" },
+    ],
+  },
+  {
+    month: "March",
+    rows: [
+      { period: "Mar 9 – Mar 22",  amount: "€6,250.00", payDate: "Fri, Mar 26" },
+      { period: "Feb 24 – Mar 8",  amount: "€7,800.75", payDate: "Fri, Mar 12" },
+    ],
+  },
+  {
+    month: "February",
+    rows: [
+      { period: "Feb 10 – Feb 23", amount: "€6,000.00", payDate: "Fri, Feb 28" },
+      { period: "Jan 27 – Feb 9",  amount: "€7,300.50", payDate: "Fri, Feb 15" },
+      { period: "Jan 15 – Jan 22", amount: "€7,300.50", payDate: "Fri, Feb 1" },
+    ],
+  },
+  {
+    month: "January",
+    rows: [
+      { period: "Jan 1 – Jan 14",  amount: "€5,500.75", payDate: "Fri, Jan 29" },
+      { period: "Dec 15 – Dec 31", amount: "€8,000.00", payDate: "Fri, Jan 14" },
+    ],
+  },
+  {
+    month: "December 2025",
+    rows: [{ period: "Dec 1 – Dec 14", amount: "€8,000.00", payDate: "Fri, Dec 24" }],
+  },
+];

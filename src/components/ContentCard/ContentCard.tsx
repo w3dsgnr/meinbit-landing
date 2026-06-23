@@ -13,24 +13,37 @@ import {
   faqItems,
 } from "@/lib/data";
 import { useCryptoPrices } from "@/hooks/useCryptoPrices";
+import Payroll from "@/components/Payroll/Payroll";
 import "./ContentCard.css";
 
 const CRYPTO_IDS = cryptoTickers.map((t) => t.coinGeckoId);
 
 export default function ContentCard() {
   return (
-    <div className="content-card">
-      <TrustSection />
-      <WhyBannerSection />
-      <FlowsSection />
-      <FiatSection />
-      <CardSection />
-      <CryptoSection />
-      <SecuritySection />
-      <SecurityChipsSection />
-      <StartSection />
-      <FaqSection />
-    </div>
+    <>
+      {/* Top white card ends after the wallet section, leaving a gap where the
+          fixed video background shows through behind the Payroll section. */}
+      <div className="content-card">
+        <TrustSection />
+        <WhyBannerSection />
+        <FlowsSection />
+        <FiatSection />
+        <CardSection />
+      </div>
+
+      {/* Scroll-animated section — must sit OUTSIDE .content-card so its GSAP
+          pin isn't clipped by the card's overflow:hidden + backdrop-filter. */}
+      <Payroll />
+
+      {/* Bottom white card resumes at the crypto section. */}
+      <div className="content-card">
+        <CryptoSection />
+        <SecuritySection />
+        <SecurityChipsSection />
+        <StartSection />
+        <FaqSection />
+      </div>
+    </>
   );
 }
 
@@ -45,7 +58,7 @@ function WhyBannerSection() {
             Everything you need<br /><span className="accent">Nothing you don't</span>
           </h2>
           <p className="section-body" style={{ margin: "16px auto 0" }}>
-            One app replaces your bank account, crypto exchange, and international transfer service.
+            One app replaces your everyday account, crypto exchange, and international transfer service.
             Simpler. Faster. Cheaper.
           </p>
         </div>
@@ -73,7 +86,7 @@ function TrustSection() {
             <span className="accent">anywhere you go</span>
           </h2>
           <p className="section-body" style={{ margin: "16px auto 0" }}>
-            From everyday spending to cross-border transfers, MeinBit pairs bank-grade
+            From everyday spending to cross-border transfers, MeinBit pairs institution-grade
             security with modern technology — so your money moves further, faster, and
             safer, in every corner of the world.
           </p>
@@ -84,7 +97,7 @@ function TrustSection() {
               <div className="stat-label">Countries available</div>
             </div>
             <div className="stat">
-              <div className="stat-value">Bank-grade</div>
+              <div className="stat-value">Institution-grade</div>
               <div className="stat-label">Security &amp; encryption</div>
             </div>
             <div className="stat">
@@ -253,7 +266,7 @@ function FiatSection() {
       <div className="cc-inner">
         <div className="si" style={{ textAlign: "center", marginBottom: 64 }}>
           <h2 className="section-title">
-            Real banking, built for<br />the <span className="accent">digital age</span>
+            Modern money, built for<br />the <span className="accent">digital age</span>
           </h2>
           <p className="section-body" style={{ margin: "0 auto" }}>
             Open a multi-currency account in EUR, USD and more. Send money via SEPA and SWIFT worldwide.
@@ -397,7 +410,7 @@ function SecurityChipsSection() {
               Built on a foundation<br /><span className="accent">of trust</span>
             </h2>
             <p className="section-body trust-badges-sub">
-              Held to the same standards as a regulated financial institution — bank-grade
+              Held to the same standards as a regulated financial institution — institution-grade
               encryption, independent audits and a licensed operating entity, working quietly
               in the background.
             </p>

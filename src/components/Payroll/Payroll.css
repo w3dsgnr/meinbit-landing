@@ -1,0 +1,573 @@
+/* ══════════════════════════════════════════════════════════════════
+   Payroll — scroll-animated section between wallet (#card) and crypto.
+   Lives OUTSIDE .content-card so the GSAP pin isn't clipped by the
+   card's overflow:hidden + backdrop-filter. The fixed video background
+   shows through this gap.
+   ══════════════════════════════════════════════════════════════════ */
+
+.pr {
+  position: relative;
+  z-index: 1;
+  /* Horizontal inset of each side card's inner edge from the phone's centre.
+     ≈ half the phone's real outer width at scale 0.86 + a ~24px gap. The Figma
+     screen is 402px and .pr-device adds padding+border, so tune this ONE number
+     to the measured .pr-phone half-width@0.86 rather than guessing a calc. */
+  --pr-sidecard-inset: 210px;
+  /* Vertical offset of each side card from the phone's centre: the left card
+     ("Save on fees") sits this far ABOVE centre, near the top border; the right
+     card ("Set it and forget it") this far BELOW, near the bottom border — a
+     mirrored, edge-aligned stagger. Tracks the phone's height (screen is
+     min(72vh,720px) → half is min(36vh,360px)) and lands each card ~16px inside
+     the mockup border. Raise the trailing 96px to pull the cards inward. */
+  --pr-sidecard-shift: calc(min(36vh, 360px) - 96px);
+}
+
+/* The pinned stage. ScrollTrigger pins this for the whole choreography;
+   its height is one viewport — the scroll DISTANCE comes from the
+   trigger's end:"+=pinDist", never from extra height here. */
+.pr-stage {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+/* ── Intro heading (fades + blurs away on scroll) ───────────────── */
+.pr-heading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(92vw, 900px);
+  text-align: center;
+  z-index: 3;
+  will-change: transform, opacity, filter;
+  pointer-events: none;
+}
+.pr-title { margin: 0; font-size: clamp(2.4rem, 7vw, 5rem); }
+.pr-sub {
+  margin: 18px auto 0;
+  max-width: 46ch;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+/* ── Phone (centred, single device, live scrolling screen) ──────── */
+.pr-phone {
+  position: relative;
+  z-index: 5;
+  will-change: transform, opacity;
+}
+.pr-device {
+  position: relative;
+  padding: 8px;
+  border: 4px solid transparent;
+  border-radius: clamp(38px, 4.4vw, 54px);
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    linear-gradient(150deg, #f4f6f8 0%, #c2ccd4 28%, #9aa6b0 50%, #cdd6dd 72%, #e9eef2 100%) border-box;
+  box-shadow: 0 30px 70px rgba(11, 34, 50, .28);
+}
+/* Metallic side buttons (power right, volume left) — mirrors .fiat-phone. */
+.pr-device::before,
+.pr-device::after {
+  content: "";
+  position: absolute;
+  width: 3px; border-radius: 3px;
+  background: linear-gradient(180deg, #c2ccd4, #9aa6b0);
+}
+.pr-device::before { right: -4px; top: 28%; height: 14%; }   /* power */
+.pr-device::after  { left: -4px;  top: 22%; height: 9%; }    /* volume */
+.pr-screen {
+  position: relative;
+  /* Query container for the direct children (.pr-statusbar, .pr-content,
+     .pr-tabbar) so THEIR own cqw box metrics resolve against the phone width
+     — not the viewport. Without this, e.g. .pr-statusbar height:14.7cqw and
+     .pr-content padding-top:14.7cqw fall back to ~14.7vw (giant on desktop),
+     since cqw resolves against the nearest ANCESTOR container. */
+  container-type: inline-size;
+  height: min(72vh, 720px);
+  aspect-ratio: 9 / 19;
+  border-radius: clamp(30px, 3.4vw, 46px);
+  overflow: clip;
+  /* Figma token: Light/Background/Main gradient light — green→blue wash over
+     white. Sits on the fixed screen viewport so it stays put as the white
+     cards / transparent list scroll over it. */
+  background:
+    linear-gradient(180deg, rgba(245, 255, 233, 0.7) 0%, rgba(205, 235, 249, 0.22) 100%),
+    var(--surface);
+}
+/* The vertically-translated content. cqw units (relative to this width)
+   make the whole UI a faithful scaled replica of the 402px Figma frame
+   at any phone size. */
+.pr-content {
+  position: relative;
+  width: 100%;
+  container-type: inline-size;
+  will-change: transform;
+  padding-top: 14.7cqw;    /* == .pr-statusbar height: first row clears the pinned bar */
+  padding-bottom: 34cqw;   /* clears the fixed tab bar at the foot of the screen */
+  font-family: 'Nunito', system-ui, sans-serif;
+  color: var(--navy);
+}
+
+/* ── iOS status bar (Figma 0:695) ───────────────────────────────────
+   Fixed overlay pinned to the TOP of the screen, OUTSIDE .pr-content, so
+   the list scrolls underneath it (mirrors the .pr-tabbar overlay below).
+   Own inline-size container so cqw units keep scaling with screen width. */
+.pr-statusbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  container-type: inline-size;
+  height: 14.7cqw;           /* ≈59px @ 402 — keep in sync with .pr-content padding-top */
+  display: flex;
+  align-items: center;
+  padding: 0 4cqw;
+  /* solid top wash matching the .pr-screen gradient's top stop, so rows
+     scrolling under the bar are masked with no visible seam */
+  background: #f8fcee;
+}
+.pr-time {
+  flex: 1;
+  text-align: center;        /* 9:41 centred in the left third, as in Figma */
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 4.2cqw;         /* 17/402 */
+  letter-spacing: -.02em;
+  color: var(--navy);
+}
+.pr-island {
+  flex: 0 0 auto;
+  width: 28.2cqw;            /* 113.2/402 */
+  height: 7.9cqw;            /* 31.9/402 */
+  border-radius: 100px;
+  background: #030303;
+}
+.pr-status-icons {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;   /* icon cluster centred in the right third */
+  gap: 1.74cqw;              /* 7/402 */
+  color: var(--navy);
+}
+/* Glyphs sized to their exact Figma footprints so they read at iOS scale. */
+.pr-sb-ico { display: block; flex: 0 0 auto; }
+.pr-sb-cell { width: 4.78cqw; height: 3.04cqw; }   /* 19.2 × 12.23 */
+.pr-sb-wifi { width: 4.27cqw; height: 3.07cqw; }   /* 17.14 × 12.33 */
+.pr-sb-batt { width: 6.80cqw; height: 3.23cqw; }   /* 27.33 × 13 */
+
+/* ── Nav title (centred, with back chevron) ─────────────────────── */
+.pr-nav {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 4.4cqw;
+  padding: 1.5cqw 0 3cqw;
+}
+.pr-nav-back {
+  position: absolute;
+  left: 4cqw;
+  font-size: 5.6cqw;
+  color: var(--navy);
+}
+
+/* ── "Running payroll for" card (label + autopayroll + locations) ─ */
+.pr-runfor {
+  margin: 0 4cqw 2cqw;
+  padding: 3cqw 3cqw 1cqw;
+  border: 1px solid #e1f1e8;
+  border-radius: 4cqw;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+}
+.pr-runfor-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2cqw;
+  padding-left: 1cqw;
+}
+.pr-runfor-label {
+  flex: 1 0 0;
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 4cqw;
+  line-height: 1.25;
+}
+.pr-badge-outline {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 1cqw 2cqw;
+  border: 1px solid #00c120;
+  border-radius: 50px;
+  color: #06a621;
+  font-weight: 600;
+  font-size: 3.2cqw;
+}
+.pr-locations {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 1cqw;
+  margin-top: 0.5cqw;
+  padding: 2cqw 1cqw;
+  border: none;
+  background: none;
+  color: #0f9de6;
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 4cqw;
+  cursor: pointer;
+}
+.pr-locations .ti { font-size: 4.4cqw; }
+
+/* ── Run payroll card ───────────────────────────────────────────── */
+.pr-card {
+  margin: 0 4cqw;
+  padding: 4cqw;
+  border: 1px solid #e1f1e8;
+  border-radius: 4cqw;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  gap: 4cqw;
+}
+.pr-card-head { display: flex; align-items: center; justify-content: space-between; }
+.pr-card-title { font-weight: 700; font-size: 5cqw; }
+.pr-pill {
+  padding: 1cqw 2cqw;
+  border-radius: 4cqw;
+  font-size: 3.2cqw;
+  font-weight: 600;
+  color: #fff;
+}
+.pr-pill-due { background: #ed7812; }
+.pr-divider { height: 1px; background: #e1f1e8; }
+.pr-card-row { display: flex; flex-direction: column; gap: 2cqw; }
+.pr-muted { color: var(--text-muted); font-family: 'Inter', system-ui, sans-serif; font-size: 3.2cqw; line-height: 1.3; }
+.pr-strong { font-weight: 700; font-size: 5cqw; }
+.pr-link { color: #0f9de6; }
+.pr-card-cols { display: flex; gap: 4cqw; }
+.pr-card-cols > div { flex: 1 0 0; display: flex; flex-direction: column; gap: 1cqw; }
+.pr-card-cols .pr-strong { font-size: 4cqw; }
+.pr-btn {
+  margin-top: 1cqw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;
+  height: 13cqw;
+  border: none;
+  border-radius: 4cqw;
+  background: rgba(213, 235, 227, .7);
+  color: var(--navy);
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 4.4cqw;
+  cursor: pointer;
+}
+.pr-btn .ti { font-size: 5cqw; }
+
+/* ── "Payroll details" list header ──────────────────────────────── */
+.pr-details-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7cqw 5cqw 3cqw;
+}
+.pr-details-title { font-weight: 600; font-size: 4cqw; color: var(--text-muted); }
+.pr-details-icons { display: inline-flex; gap: 3cqw; color: var(--navy); font-size: 4.6cqw; opacity: .8; }
+
+/* ── Month group + payroll rows ─────────────────────────────────── */
+.pr-group { padding: 0 4cqw; }
+.pr-month {
+  margin: 2cqw 0;
+  padding: 2cqw 3cqw;
+  background: var(--teal-bg);
+  border-radius: 4cqw;
+  text-transform: uppercase;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 2.7cqw;
+  letter-spacing: .04em;
+  color: var(--text-muted);
+}
+.pr-row {
+  display: flex;
+  align-items: center;
+  gap: 2.4cqw;
+  padding: 2cqw;
+}
+.pr-row-ico {
+  flex-shrink: 0;
+  width: 10cqw;
+  height: 10cqw;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--teal-bg);
+  color: #94a3a3;
+  font-size: 4.8cqw;
+}
+.pr-row-main { flex: 1 0 0; display: flex; flex-direction: column; gap: 1cqw; min-width: 0; }
+.pr-row-title {
+  font-weight: 700;
+  font-size: 4cqw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pr-row-sub {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 3.2cqw;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pr-row-right { display: flex; flex-direction: column; align-items: flex-end; gap: 1cqw; white-space: nowrap; }
+.pr-row-amount { font-weight: 700; font-size: 4cqw; font-variant-numeric: tabular-nums; }
+.pr-row-status { font-family: 'Inter', system-ui, sans-serif; font-size: 3.2cqw; color: #06a621; }
+
+.pr-showmore {
+  display: block;
+  margin: 5cqw auto 0;
+  padding: 2.4cqw 6cqw;
+  border: none;
+  border-radius: 50px;
+  background: var(--teal-bg);
+  color: var(--navy);
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 3.4cqw;
+  cursor: pointer;
+}
+
+/* ── iOS bottom tab bar + home indicator (Figma 11:608) ─────────────
+   Fixed overlay pinned to the foot of the screen; the list scrolls
+   underneath and dissolves into the light "scroll bottom" gradient.
+   .pr-tabbar is the query container (its width == screen width), so the
+   bar scales with the phone exactly like .pr-content does. */
+.pr-tabbar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  container-type: inline-size;
+  background: linear-gradient(to top, #f4fafe 45%, rgba(243, 250, 253, 0));
+  pointer-events: none;
+}
+.pr-tabbar-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2cqw;                 /* Gap-8 */
+  padding-top: 12cqw;        /* fade runway above the menu */
+}
+.pr-tabbar-menu {
+  display: flex;
+  align-items: center;
+  padding: 2cqw;             /* Gap-8 */
+  border-radius: 6cqw;       /* Corner/2 size = 24 */
+  background: rgba(13, 50, 73, 0.7);          /* Color/Bottom menu/Default */
+  box-shadow: 0 2.5cqw 5cqw rgba(11, 34, 50, 0.15);   /* Button/Primary default */
+  backdrop-filter: blur(2.5cqw);
+  -webkit-backdrop-filter: blur(2.5cqw);
+  pointer-events: auto;
+}
+.pr-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2cqw;                 /* Gap-8 */
+  width: 21.5cqw;            /* 87px @ 402 */
+  padding: 3cqw;             /* Gap-12 */
+  border: none;
+  border-radius: 4cqw;       /* BR-16 */
+  background: none;
+  color: #fff;               /* Color/Text/Primary Inverse */
+  cursor: pointer;
+}
+.pr-tab .ti { font-size: 5cqw; }   /* icon 20px */
+.pr-tab span {
+  font-family: 'Nunito', system-ui, sans-serif;
+  font-weight: 600;          /* SF Pro Rounded Semibold */
+  font-size: 2.7cqw;         /* 11px */
+  line-height: 3.5cqw;       /* 14px */
+  text-transform: uppercase;
+  text-align: center;
+}
+/* Selected (Send): green top-fade + a subtle white wash, rounded 16. */
+.pr-tab-active {
+  background:
+    linear-gradient(180deg, rgba(45, 255, 166, 0.2) 0%, rgba(45, 255, 166, 0) 100%),
+    rgba(255, 255, 255, 0.1);
+}
+.pr-home-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 8.5cqw;            /* 34px @ 402 */
+}
+.pr-home-indicator span {
+  width: 33.3cqw;            /* 134px */
+  height: 1.25cqw;           /* 5px */
+  border-radius: 100px;
+  background: #0b2232;       /* Color/Icon/Primary */
+}
+
+/* ── Floating transaction cards (Figma 5:507) ───────────────────── */
+.pr-floaters {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+}
+.pr-floater {
+  position: absolute;
+  width: clamp(150px, 17vw, 196px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #e1f1e8;
+  box-shadow: 0 14px 34px rgba(11, 34, 50, .14);
+  opacity: 0;                       /* shown only by the desktop timeline */
+  will-change: transform, opacity;
+  transform: translate(-50%, -50%);
+}
+.pr-floater-ico {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--teal-bg);
+  display: grid;
+  place-items: center;
+}
+.pr-floater-ico img { width: 100%; height: 100%; object-fit: cover; }
+.pr-floater-main { flex: 1 0 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.pr-floater-title { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 14px; color: var(--navy); }
+.pr-floater-sub { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.pr-floater-right { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
+.pr-floater-amount { font-family: 'Nunito', system-ui, sans-serif; font-weight: 700; font-size: 13px; color: var(--navy); }
+.pr-floater-eur { font-family: 'Inter', system-ui, sans-serif; font-weight: 500; font-size: 12px; color: var(--text-muted); }
+
+/* Scattered positions around the phone (centre x = 50%). */
+.pr-floater-0 { left: 15%; top: 30%; }
+.pr-floater-1 { left: 11%; top: 55%; }
+.pr-floater-2 { left: 17%; top: 80%; }
+.pr-floater-3 { left: 85%; top: 27%; }
+.pr-floater-4 { left: 89%; top: 53%; }
+.pr-floater-5 { left: 83%; top: 78%; }
+
+/* ── Capability cards flanking the phone (scaled-down .banner-card) ──────────
+   Default = the ≥1100px side-slot layout: absolute, vertically centred, anchored
+   a fixed inset from the phone centre. Behind the phone (z-index 4 < phone's 5)
+   so they emerge from behind it. opacity:1 is the resting state; the animated
+   contexts set opacity:0 before first paint, so static branches need no override. */
+.pr-sidecards {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+}
+.pr-sidecard {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);   /* GSAP uses yPercent:-50 in the animated ctx */
+  width: clamp(220px, 21vw, 290px);
+  padding: 64px 20px 22px;       /* 64 top clears the 96px image that overhangs the top */
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(11, 34, 50, .06);
+  opacity: 1;
+  will-change: transform, opacity;
+}
+.pr-sidecard-left  { right: calc(50% + var(--pr-sidecard-inset)); left: auto; top: calc(50% - var(--pr-sidecard-shift)); }
+.pr-sidecard-right { left:  calc(50% + var(--pr-sidecard-inset)); right: auto; top: calc(50% + var(--pr-sidecard-shift)); }
+.pr-sidecard-img {
+  position: absolute;
+  top: -40px;
+  left: 20px;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  pointer-events: none;
+}
+.pr-sidecard-title {
+  font-family: 'Sora', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--navy);
+  margin: 0 0 8px;
+}
+.pr-sidecard-body {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ── Narrow (<1100px): no pin/scrub — the resting composition stacks. The side
+      slots can't fit beside the phone here, so the cards drop into a grid below
+      it (visible, never hidden). The collapse choreography (floaters) is a
+      wide-desktop device only. ──────────────────────────────────────────────── */
+@media (max-width: 1099px) {
+  .pr-stage {
+    height: auto;
+    flex-direction: column;
+    gap: 28px;
+    padding: 72px 0;
+  }
+  .pr-heading {
+    position: static;
+    transform: none;
+    width: auto;
+    padding: 0 20px;
+  }
+  .pr-screen { height: min(78vh, 560px); }
+  .pr-floaters { display: none; }   /* decorative animation device only */
+
+  .pr-sidecards {
+    position: static;
+    inset: auto;
+    z-index: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: min(92vw, 600px);
+    /* stage gap (28) + margin (24) − image overhang (40) ≈ 12px clear of the phone */
+    margin: 24px auto 0;
+  }
+  .pr-sidecard {
+    position: static;
+    top: auto;
+    transform: none;
+    width: auto;
+  }
+  .pr-sidecard-left,
+  .pr-sidecard-right { left: auto; right: auto; top: auto; }
+}
+
+@media (max-width: 560px) {
+  .pr-sidecards { grid-template-columns: 1fr; width: min(92vw, 320px); }
+}
